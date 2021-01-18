@@ -293,50 +293,84 @@ ball.possession_team_id(ball.possession_team_id == 475) = 2;
 %Then using the identifier of the conductions we build up a ballowner
 %variable that is then transform in a position (1-11) depending on which
 %player posses the ball at each moment in time. 
-for i=1:length(Events.conductions)
-    if Events.conductions(i,8)<gamedetails(9)
-        ballowner((Events.conductions(i,8):Events.conductions(i,9))-gamedetails(10))= Events.conductions(i,6) ;   
+
+% filtering according to event type and frames (for 1st half)
+ix_pass = events.event_type_id == 1;
+ix_conduct = events.event_type_id == 0;
+ix_first_half = events.start_frame >= game_details.ht1_frame_start  & ...
+    events.end_frame <= game_details.ht1_frame_end;
+
+Events.pass = events(ix_pass & ix_first_half,:);
+Events.conduct = events(ix_conduct & ix_first_half,:);
+% clear events ?
+
+ball.possession_player_id = nan(size(ball.possession_team_id));
+for type = 1:2
+    if type == 1
+        event = Events.pass;
+    else
+        event = Events.conduct;
     end
-    if Events.conductions(i,8)>=gamedetails(9)
-        ballowner(((Events.conductions(i,8):Events.conductions(i,9))-gamedetails( 14))+68673)= Events.conductions(i,6) ;   
+    
+    for i = 1:size(event,1)
+        ix = frames >= Events.pass(i,:).start_frame & ...
+            frames <= Events.pass(i,:).end_frame;
+        ball.possession_player_id(ix) = event(i,:).player_id;
     end
 end
 
-for i=1:length(ballowner)
-    if ballowner(i)==playersdetails(1,1) || ballowner(i)==playersdetails(15,1)
-        ballowner(i)=1;
-    end
-    if ballowner(i)==playersdetails(19,1)|| ballowner(i)==playersdetails(6,1)
-        ballowner(i)=2;
-    end
-     if ballowner(i)==playersdetails(3,1) || ballowner(i)==playersdetails(18,1) || ballowner(i)==playersdetails(14,1)
-        ballowner(i)=3;
-     end
-     if ballowner(i)==playersdetails(16,1)|| ballowner(i)==playersdetails(4,1) 
-        ballowner(i)=4;
-     end
-      if ballowner(i)==playersdetails(2,1) || ballowner(i)==playersdetails(17,1)
-        ballowner(i)=5;
-      end
-      if ballowner(i)==playersdetails(9,1) || ballowner(i)==playersdetails(23,1) || ballowner(i)==playersdetails(27,1) || (ballowner(i)==playersdetails(21,1) && i>=88859)
-        ballowner(i)=6;
-      end
-      if ballowner(i)==playersdetails(8,1) || (ballowner(i)==playersdetails(21,1) && i<88859) || (ballowner(i)==playersdetails(22,1) && i>=88859)
-        ballowner(i)=7;
-      end
-      if (ballowner(i)==playersdetails(7,1) && i<108830) || ballowner(i)==playersdetails(13,1) || ballowner(i)==playersdetails(20,1)
-        ballowner(i)=8;
-      end
-      if ballowner(i)==playersdetails(24,1) || (ballowner(i)==playersdetails(7,1) && i>=108830)|| ballowner(i)==playersdetails(5,1) 
-        ballowner(i)=9;
-      end
-      if ballowner(i)==playersdetails(11,1) || ballowner(i)==playersdetails(12,1) || ballowner(i)==playersdetails(22,1)  || ballowner(i)==playersdetails(28,1) || (ballowner(i)==playersdetails(25,1) && i>=88859) 
-        ballowner(i)=10;
-      end
-      if ballowner(i)==playersdetails(10,1) || (ballowner(i)==playersdetails(25,1) && i<88859) ||ballowner(i)==playersdetails(26,1)
-        ballowner(i)=11;
-      end
+% that is then transform in a position (1-11) depending on which
+% player posses the ball at each moment in time. 
+
+% creating an alternative player_id for the ball owner, correspoding to the
+% column on the matrices here created.
+temp = ball.possession_player_id;
+ball.possession_player_id2 = nan(size(ball,1),1);
+
+% matrix 11 x 3 (11 players per team x (ro
+list = [3780 3902 1;...
+    3390 3907 2;...
+    3811 3904 3;...
+    3781 3905 4;...
+    3810 3903 5;...
+    3787 3906 6;...
+    3394 3910 7;...
+    3838 3909 8;...
+    3839 3908 9;...
+    3784 3911 10;...
+    3399 1428 11];
+
+for pp = 1:11
+    ix = temp == list(pp,1) | temp == list(pp,2);
+    ball.possession_player_id2(ix) = list(pp,3);
 end
+
+% that is then transform in a position (1-11) depending on which
+% player posses the ball at each moment in time. 
+
+% creating an alternative player_id for the ball owner, correspoding to the
+% column on the matrices here created.
+temp = ball.possession_player_id;
+ball.possession_player_id2 = nan(size(ball,1),1);
+
+% matrix 11 x 3 (11 players per team + respective column number)
+list = [3780 3902 1;...
+    3390 3907 2;...
+    3811 3904 3;...
+    3781 3905 4;...
+    3810 3903 5;...
+    3787 3906 6;...
+    3394 3910 7;...
+    3838 3909 8;...
+    3839 3908 9;...
+    3784 3911 10;...
+    3399 1428 11];
+
+for pp = 1:11
+    ix = temp == list(pp,1) | temp == list(pp,2);
+    ball.possession_player_id2(ix) = list(pp,3);
+end
+
 
 % filters plays under study from 25 to 5 Hz to reduce noise
 ix = [1:5:1125 2600:5:3150];
