@@ -128,6 +128,14 @@ ball.y = ball_positions_possessions.y(ix_time);
 
 frames = ball_positions_possessions.frame(ix_time);
 
+% All the data is 'inverted' meaning that the corner nearer to the camera is
+% the 0 (longitudinal),74.37 (lateral) point. Although irrelevant for the calculations when
+% visualizing the data this was highly confusing. Therefore to better
+% visualize data we inverted it. Meaning that this corner was now 0,0.
+% where does 74.37 com from?
+ball_y = 74.37 - ball.y;
+Team_A.y{:,:} = 74.37 - Team_A.y{:,:};
+Team_B.y{:,:} = 74.37 - Team_B.y{:,:};
 
 %% Data parse 
 
@@ -151,86 +159,6 @@ fs=25; % frequency sampling, Hz
 dt=1/fs;
 frame1sthalf=gamedetails(10);
 frame2ndhalf=gamedetails(14);
-
-
-
-%% First cut 
-%Using the information avaialable in Gamedetails we eliminate the
-%information before the game started and in between halfs. 
-
-% Team_A
-GK_TeamA_c=GK_TeamA(find(GK_TeamA(:,1)==gamedetails( 10)):(find(GK_TeamA(:,1)==78985)),:);
-GK_TeamA_c(68673:143359,:)=GK_TeamA(find(GK_TeamA(:,1)==gamedetails( 14)):end,:);
-LB_TeamA_c=LB_TeamA(find(LB_TeamA(:,1)==gamedetails( 10)):(find(LB_TeamA(:,1)==78985)),:);
-LB_TeamA_c(68673:143359,:)=LB_TeamA(find(LB_TeamA(:,1)==gamedetails( 14)):end,:);
-RB_TeamA_c=RB_TeamA(find(RB_TeamA(:,1)==gamedetails( 10)):(find(RB_TeamA(:,1)==78985)),:);
-RB_TeamA_c(68673:143359,:)=RB_TeamA(find(RB_TeamA(:,1)==gamedetails( 14)):end,:);
-CB1_TeamA_c=CB1_TeamA(find(CB1_TeamA(:,1)==gamedetails( 10)):(find(CB1_TeamA(:,1)==78985)),:);
-CB1_TeamA_c(68673:143359,:)=CB1_TeamA(find(CB1_TeamA(:,1)==gamedetails( 14)):end,:);
-CB2_TeamA_c=CB2_TeamA(find(CB2_TeamA(:,1)==gamedetails(10)):(find(CB2_TeamA(:,1)==78985)),:);
-CB2_TeamA_c(68673:143359,:)=CB2_TeamA(find(CB2_TeamA(:,1)==gamedetails( 14)):end,:);
-CM_TeamA_c=CM_TeamA(find(CM_TeamA(:,1)==gamedetails(10)):(find(CM_TeamA(:,1)==78985)),:);
-CM_TeamA_c(68673:143359,:)=CM_TeamA(find(CM_TeamA(:,1)==gamedetails(14)):end,:);
-MF1_TeamA_c=MF1_TeamA(find(MF1_TeamA(:,1)==gamedetails( 10)):(find(MF1_TeamA(:,1)==78985)),:);
-MF1_TeamA_c(68673:143359,:)=MF1_TeamA(find(MF1_TeamA(:,1)==gamedetails( 14)):end,:);
-MF2_TeamA_c=MF2_TeamA(find(MF2_TeamA(:,1)==gamedetails( 10)):(find(MF2_TeamA(:,1)==78985)),:);
-MF2_TeamA_c(68673:143359,:)=MF2_TeamA(find(MF2_TeamA(:,1)==gamedetails(14)):end,:);
-LW_TeamA_c=LW_TeamA(find(LW_TeamA(:,1)==gamedetails( 10)):(find(LW_TeamA(:,1)==78985)),:);
-LW_TeamA_c(68673:143359,:)=LW_TeamA(find(LW_TeamA(:,1)==gamedetails( 14)):end,:);
-ST_TeamA_c=ST_TeamA(find(ST_TeamA(:,1)==gamedetails( 10)):(find(ST_TeamA(:,1)==78985)),:);
-ST_TeamA_c(68673:143359,:)=ST_TeamA(find(ST_TeamA(:,1)==gamedetails( 14)):end,:);
-RW_TeamA_c=RW_TeamA(find(RW_TeamA(:,1)==gamedetails( 10)):(find(RW_TeamA(:,1)==78985)),:);
-RW_TeamA_c(68673:143359,:)=RW_TeamA(find(RW_TeamA(:,1)==gamedetails(14)):end,:);
-
-% Team_B
-GK_TeamB_c=GK_TeamB(find(GK_TeamB(:,1)==gamedetails(10)):(find(GK_TeamB(:,1)==78985)),:);
-GK_TeamB_c(68673:143359,:)=GK_TeamB(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-
-LB_TeamB_c=LB_TeamB(find(LB_TeamB(:,1)==gamedetails(10)):(find(LB_TeamB(:,1)==78985)),:);
-LB_TeamB_c(68673:143359,:)=LB_TeamB(find(LB_TeamB(:,1)==gamedetails(14)):end,:);
-
-RB_TeamB_c=RB_TeamB(find(RB_TeamB(:,1)==gamedetails( 10)):(find(RB_TeamB(:,1)==78985)),:);
-RB_TeamB_c(68673:143359,:)=RB_TeamB(find(RB_TeamB(:,1)==gamedetails(14)):end,:);
-
-CB1_TeamB_c=CB1_TeamB(find(CB1_TeamB(:,1)==gamedetails( 10)):(find(CB1_TeamB(:,1)==78985)),:);
-CB1_TeamB_c(68673:143359,:)=CB1_TeamB(find(CB1_TeamB(:,1)==gamedetails( 14)):end,:);
-
-CB2_TeamB_c=CB2_TeamB(find(CB2_TeamB(:,1)==gamedetails(10)):(find(CB2_TeamB(:,1)==78985)),:);
-CB2_TeamB_c(68673:143359,:)=CB2_TeamB(find(CB2_TeamB(:,1)==gamedetails( 14)):end,:);
-
-CM_TeamB_c=CM_TeamB(find(CM_TeamB(:,1)==gamedetails( 10)):(find(CM_TeamB(:,1)==78985)),:);
-CM_TeamB_c(68673:143359,:)=CM_TeamB(find(CM_TeamB(:,1)==gamedetails(14)):end,:);
-
-MF1_TeamB_c=MF1_TeamB(find(MF1_TeamB(:,1)==gamedetails(10)):(find(MF1_TeamB(:,1)==78985)),:);
-MF1_TeamB_c(68673:143359,:)=MF1_TeamB(find(MF1_TeamB(:,1)==gamedetails(14)):end,:);
-
-LW_TeamB_c=LW_TeamB(find(LW_TeamB(:,1)==gamedetails( 10)):(find(LW_TeamB(:,1)==78985)),:);
-LW_TeamB_c(68673:143359,:)=LW_TeamB(find(LW_TeamB(:,1)==gamedetails(14)):end,:);
-
-MF2_TeamB_c=MF2_TeamB(find(MF2_TeamB(:,1)==gamedetails( 10)):(find(MF2_TeamB(:,1)==78985)),:);
-MF2_TeamB_c(68673:143359,:)=MF2_TeamB(find(MF2_TeamB(:,1)==gamedetails( 14)):end,:);
-
-RW_TeamB_c=RW_TeamB(find(RW_TeamB(:,1)==gamedetails( 10)):(find(RW_TeamB(:,1)==78985)),:);
-RW_TeamB_c(68673:143359,:)=RW_TeamB(find(RW_TeamB(:,1)==gamedetails( 14)):end,:);
-
-ST_TeamB_c=ST_TeamB(find(ST_TeamB(:,1)==gamedetails( 10)):(find(ST_TeamB(:,1)==78985)),:);
-ST_TeamB_c(68673:143359,:)=ST_TeamB(find(ST_TeamB(:,1)==gamedetails( 14)):end,:);
-
-% We do the same for the ball.
-ball=ballpositionsandgamecontext(find(ballpositionsandgamecontext(:,1)==gamedetails( 10)):(find(ballpositionsandgamecontext(:,1)==78985)),:);
-ball(68673:143360,:)=ballpositionsandgamecontext(find(ballpositionsandgamecontext(:,1)==gamedetails( 14)):end,:);
-time=(1:length(ST_TeamA_c))*dt;
-
-%All the data is 'inverted' meaning that the corner nearer to the camera is
-% the 0 (longitudinal),74.37 (lateral) point. Although irrelevant for the calculations when
-% visualizing the data this was highly confusing. Therefore to better
-% visualize data we inverted it. Meaning that this corner was now 0,0.
-xball=ball(:,3);
-yball=74.37-ball(:,4);
-x_TeamB=[GK_TeamB_c(:,4) LB_TeamB_c(:,4) CB1_TeamB_c(:,4) CB2_TeamB_c(:,4) RB_TeamB_c(:,4)  CM_TeamB_c(:,4) MF1_TeamB_c(:,4) MF2_TeamB_c(:,4) LW_TeamB_c(:,4) RW_TeamB_c(:,4) ST_TeamB_c(:,4)];
-y_TeamB=74.37-[GK_TeamB_c(:,5) LB_TeamB_c(:,5) CB1_TeamB_c(:,5) CB2_TeamB_c(:,5) RB_TeamB_c(:,5)  CM_TeamB_c(:,5) MF1_TeamB_c(:,5) MF2_TeamB_c(:,5) LW_TeamB_c(:,5) RW_TeamB_c(:,5) ST_TeamB_c(:,5)];
-x_TeamA=[GK_TeamA_c(:,4) LB_TeamA_c(:,4) CB1_TeamA_c(:,4) CB2_TeamA_c(:,4) RB_TeamA_c(:,4)  CM_TeamA_c(:,4) MF1_TeamA_c(:,4) MF2_TeamA_c(:,4)   LW_TeamA_c(:,4) RW_TeamA_c(:,4) ST_TeamA_c(:,4) ];
-y_TeamA=74.37-[GK_TeamA_c(:,5) LB_TeamA_c(:,5) CB1_TeamA_c(:,5) CB2_TeamA_c(:,5) RB_TeamA_c(:,5)  CM_TeamA_c(:,5) MF1_TeamA_c(:,5) MF2_TeamA_c(:,5) LW_TeamA_c(:,5) RW_TeamA_c(:,5) ST_TeamA_c(:,5)  ];
 
 % We build a velocity full team variable with the players parse and remove
 % the irrelevant part. The one before the start of the game and in between
