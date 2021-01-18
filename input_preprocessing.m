@@ -89,7 +89,7 @@ id_start11_TeamA = players_details{row_list,1};
 % starting 11's - Team_B
 % row_list correspond to row in player_details table
 row_list = [1,6,3,4,2,5,9,8,7,11,10];
-id_start11_TeamA = players_details{row_list,1};
+id_start11_TeamB = players_details{row_list,1};
 
 % pitch positions
 position_list = {'GK','LB','CB1','CB2','RB','LW','CM','MF1','MF2','RW','ST'};
@@ -137,23 +137,7 @@ ball_y = 74.37 - ball.y;
 Team_A.y{:,:} = 74.37 - Team_A.y{:,:};
 Team_B.y{:,:} = 74.37 - Team_B.y{:,:};
 
-%% Data parse 
-
-%First we parse the pass events and the conductions. We only need these two
-%types of events to create the teamballowner and ballowner.
-
-p=1;
-c=1;
-for i=1:length(events)
-    if events(i,5)==1
-    Events.pass(p,:)=events(i,:);
-    p=p+1;
-    end
-    if events(i,5)==0
-       Events.conductions(c,:)=events(i,:);
-       c=c+1;
-    end
-end
+%% Calculating velocity and speed
 
 fs=25; % frequency sampling, Hz
 dt=1/fs;
@@ -274,8 +258,8 @@ Team_B.a_total = array2table(sqrt(Team_B.a_x{:,:}.^2 + Team_B.a_y{:,:}.^2),...
     'VariableNames',position_list);
 
 % high velocity percentiles (used later on)
-vt_TeamA_prct99_95 = prctile(vt_TeamA, 99.95);
-vt_TeamB_prct99_95 = prctile(vt_TeamB, 99.95);
+vt_TeamA_prct99_95 = prctile(Team_A.v_total{:,:}, 99.95);
+vt_TeamB_prct99_95 = prctile(Team_B.v_total{:,:}, 99.95);
 
 %%
 % Now we intend to create two variables, one that tell us who is the team
@@ -371,38 +355,21 @@ for pp = 1:11
     ball.possession_player_id2(ix) = list(pp,3);
 end
 
-
-
 % filters plays under study from 25 to 5 Hz to reduce noise
-ix = [1:5:1125 2600:5:3150];
-x_TeamA = x_TeamA(ix,:);
-y_TeamA = y_TeamA(ix,:);
+% subset for repository
+ix_plays = [1:5:1125 2600:5:3150];
 
-x_TeamB = x_TeamB(ix,:);
-y_TeamB = y_TeamB(ix,:);
+% filters "frames" array and "ball" table
+frames = frames(ix_plays);
+ball = ball(ix_plays,:);
 
-vx_TeamA = vx_TeamA(ix,:);
-vy_TeamA = vy_TeamA(ix,:);
-vt_TeamA = vt_TeamA(ix,:);
-
-vx_TeamB = vx_TeamB(ix,:);
-vy_TeamB = vy_TeamB(ix,:);
-vt_TeamB = vt_TeamB(ix,:);
-
-ax_TeamA = ax_TeamA(ix,:);
-ay_TeamA = ay_TeamA(ix,:);
-at_TeamA = at_TeamA(ix,:);
-
-ax_TeamB = ax_TeamB(ix,:);
-ay_TeamB = ay_TeamB(ix,:);
-at_TeamB = at_TeamB(ix,:);
-
-teamballowner = teamballowner(ix);
-ballowner = ballowner(ix);
+% runs every field of "Team" structures
+fields = fieldnames(Team_A);
+for ff = 1:length(fields)
+    Team_A.(fields{ff}) = Team_A.(fields{ff})(ix_plays,:);
+    Team_B.(fields{ff}) = Team_B.(fields{ff})(ix_plays,:);
+end
 
 save('preprocessed_inputs.mat',...
-    'teamballowner','ballowner',...
-    'x_TeamA','y_TeamA','x_TeamB','y_TeamB',...
-    'vx_TeamA','vy_TeamA','vt_TeamA','vx_TeamB','vy_TeamB','vt_TeamB',...
-    'ax_TeamA','ay_TeamA','at_TeamA','ax_TeamB','ay_TeamB','at_TeamB',...
+    'Team_A','Team_B','ball',...
     'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
