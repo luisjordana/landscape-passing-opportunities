@@ -157,51 +157,53 @@ end
 
 fs=25; % frequency sampling, Hz
 dt=1/fs;
-frame1sthalf=gamedetails(10);
-frame2ndhalf=gamedetails(14);
 
-% We build a velocity full team variable with the players parse and remove
-% the irrelevant part. The one before the start of the game and in between
-% the half.
-vx_TeamA=[GK_TeamA(:,7) LB_TeamA(:,7) CB1_TeamA(:,7) CB2_TeamA(:,7) RB_TeamA(:,7) CM_TeamA(:,7) MF1_TeamA(:,7) MF2_TeamA(:,7) LW_TeamA(:,7) RW_TeamA(:,7) ST_TeamA(:,7) ];
-vy_TeamA=[GK_TeamA(:,8) LB_TeamA(:,8) CB1_TeamA(:,8) CB2_TeamA(:,8) RB_TeamA(:,8) CM_TeamA(:,8) MF1_TeamA(:,8) MF2_TeamA(:,8) LW_TeamA(:,8) RW_TeamA(:,8) ST_TeamA(:,8) ];
-vx_TeamB=[GK_TeamB(:,7) LB_TeamB(:,7) CB1_TeamB(:,7) CB2_TeamB(:,7) RB_TeamB(:,7) CM_TeamB(:,7) MF1_TeamB(:,7) MF2_TeamB(:,7)  LW_TeamB(:,7) RW_TeamB(:,7) ST_TeamB(:,7)];
-vy_TeamB=[GK_TeamB(:,8) LB_TeamB(:,8) CB1_TeamB(:,8) CB2_TeamB(:,8) RB_TeamB(:,8) CM_TeamB(:,8) MF1_TeamB(:,8) MF2_TeamB(:,8) LW_TeamB(:,8)  RW_TeamB(:,8) ST_TeamB(:,8)];
-vt_TeamA=[GK_TeamA(:,9) LB_TeamA(:,9) CB1_TeamA(:,9) CB2_TeamA(:,9) RB_TeamA(:,9) CM_TeamA(:,9) MF1_TeamA(:,9) MF2_TeamA(:,9) LW_TeamA(:,9) RW_TeamA(:,9) ST_TeamA(:,9) ];
-vt_TeamB=[GK_TeamB(:,9) LB_TeamB(:,9) CB1_TeamB(:,9) CB2_TeamB(:,9) RB_TeamB(:,9)  CM_TeamB(:,9) MF1_TeamB(:,9) MF2_TeamB(:,9) LW_TeamB(:,9) RW_TeamB(:,9) ST_TeamB(:,9)];
+% calculating speed in x, in y, and total, as well as velocity angle
+Team_A.v_x = array2table([diff(Team_A.x{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.v_y = array2table([diff(Team_A.y{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.v_total = array2table(sqrt(Team_A.v_x{:,:}.^2 + Team_A.v_y{:,:}.^2),...
+    'VariableNames',position_list);
+Team_A.v_angle = array2table(atan2d(Team_A.v_x{:,:},Team_A.v_y{:,:}),...
+    'VariableNames',position_list);
 
-ax_TeamA=[GK_TeamA(:,10) LB_TeamA(:,10) CB1_TeamA(:,10) CB2_TeamA(:,10) RB_TeamA(:,10) CM_TeamA(:,10) MF1_TeamA(:,10) MF2_TeamA(:,10) LW_TeamA(:,10) RW_TeamA(:,10) ST_TeamA(:,10) ];
-ay_TeamA=[GK_TeamA(:,11) LB_TeamA(:,11) CB1_TeamA(:,11) CB2_TeamA(:,11) RB_TeamA(:,11) CM_TeamA(:,11) MF1_TeamA(:,11) MF2_TeamA(:,11) LW_TeamA(:,11)  RW_TeamA(:,11) ST_TeamA(:,11) ];
-ax_TeamB=[GK_TeamB(:,10) LB_TeamB(:,10) CB1_TeamB(:,10) CB2_TeamB(:,10) RB_TeamB(:,10) CM_TeamB(:,10) MF1_TeamB(:,10) MF2_TeamB(:,10)  LW_TeamB(:,10) RW_TeamB(:,10) ST_TeamB(:,10)];
-ay_TeamB=[GK_TeamB(:,11) LB_TeamB(:,11) CB1_TeamB(:,11) CB2_TeamB(:,11) RB_TeamB(:,11)  CM_TeamB(:,11) MF1_TeamB(:,11) MF2_TeamB(:,11) LW_TeamB(:,11) RW_TeamB(:,11) ST_TeamB(:,11)];
-at_TeamA=[GK_TeamA(:,12) LB_TeamA(:,12) CB1_TeamA(:,12) CB2_TeamA(:,12) RB_TeamA(:,12) CM_TeamA(:,12) MF1_TeamA(:,12) MF2_TeamA(:,12) LW_TeamA(:,12)  RW_TeamA(:,12) ST_TeamA(:,12) ];
-at_TeamB=[GK_TeamB(:,12) LB_TeamB(:,12) CB1_TeamB(:,12) CB2_TeamB(:,12) RB_TeamB(:,12) CM_TeamB(:,12) MF1_TeamB(:,12) MF2_TeamB(:,12)  LW_TeamB(:,12) RW_TeamB(:,12)  ST_TeamB(:,12)];
+Team_B.v_x = array2table([diff(Team_B.x{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.v_y = array2table([diff(Team_B.y{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.v_total = array2table(sqrt(Team_B.v_x{:,:}.^2 + Team_B.v_y{:,:}.^2),...
+    'VariableNames',position_list);
+Team_B.v_angle = array2table(atan2d(Team_B.v_x{:,:},Team_B.v_y{:,:}),...
+    'VariableNames',position_list);
 
-vx_TeamB_c(1:68673,1:11)=vx_TeamB(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-vx_TeamB_c(68673:143359,1:11)=vx_TeamB(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-vy_TeamB_c(1:68673,1:11)=vy_TeamB(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-vy_TeamB_c(68673:143359,1:11)=vy_TeamB(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-vt_TeamB_c(1:68673,1:11)=vt_TeamB(find(GK_TeamB(:,1)==gamedetails(10)):(find(GK_TeamB(:,1)==78985)),:);
-vt_TeamB_c(68673:143359,1:11)=vt_TeamB(find(GK_TeamB(:,1)==gamedetails(14)):end,:);
-vx_TeamA_c(1:68673,1:11)=vx_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-vx_TeamA_c(68673:143359,1:11)=vx_TeamA(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-vy_TeamA_c(1:68673,1:11)=vy_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-vy_TeamA_c(68673:143359,1:11)=vy_TeamA(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-vt_TeamA_c(1:68673,1:11)=vt_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-vt_TeamA_c(68673:143359,1:11)=vt_TeamA(find(GK_TeamB(:,1)==gamedetails(14)):end,:);
+ball.v_x = [diff(ball.x)/dt; nan];
+ball.v_y = [diff(ball.y)/dt; nan];
+ball.v_total = sqrt(ball.v_x.^2 + ball.v_y.^2);
+ball.v_angle = atan2d(ball.v_x,ball.v_y);
 
-ax_TeamB_c(1:68673,1:11)=ax_TeamB(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-ax_TeamB_c(68673:143359,1:11)=ax_TeamB(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-ay_TeamB_c(1:68673,1:11)=ay_TeamB(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-ay_TeamB_c(68673:143359,1:11)=ay_TeamB(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-at_TeamB_c(1:68673,1:11)=at_TeamB(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-at_TeamB_c(68673:143359,1:11)=at_TeamB(find(GK_TeamB(:,1)==gamedetails(14)):end,:);
-ax_TeamA_c(1:68673,1:11)=ax_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-ax_TeamA_c(68673:143359,1:11)=ax_TeamA(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-ay_TeamA_c(1:68673,1:11)=ay_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-ay_TeamA_c(68673:143359,1:11)=ay_TeamA(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
-at_TeamA_c(1:68673,1:11)=at_TeamA(find(GK_TeamB(:,1)==gamedetails( 10)):(find(GK_TeamB(:,1)==78985)),:);
-at_TeamA_c(68673:143359,1:11)=at_TeamA(find(GK_TeamB(:,1)==gamedetails( 14)):end,:);
+% calculating acceleration in x, in y, and total, as well as acceleration
+% angle
+Team_A.a_x = array2table([diff(Team_A.v_x{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.a_y = array2table([diff(Team_A.v_y{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.a_total = array2table(sqrt(Team_A.a_x{:,:}.^2 + Team_A.a_y{:,:}.^2),...
+    'VariableNames',position_list);
+
+Team_B.a_x = array2table([diff(Team_B.v_x{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.a_y = array2table([diff(Team_B.v_y{:,:}); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.a_total = array2table(sqrt(Team_B.a_x{:,:}.^2 + Team_B.a_y{:,:}.^2),...
+    'VariableNames',position_list);
+
+ball.a_x = [diff(ball.v_x); nan]/dt;
+ball.a_y = [diff(ball.v_y); nan]/dt;
+ball.a_total = sqrt(ball.a_x.^2 + ball.a_y.^2);
+
+% clears unneeded data (frees up RAM)
+clearvars playerspositions
 
 %We use the data to remove the highest percentile from the velocity.
 %Meaning we remove the irreal peaks related to noise. and resample the data
