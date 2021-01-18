@@ -24,7 +24,7 @@ addpath(genpath(folder));
 % id: team identifier.
 % name: name of the team
 filename = 'teams_details.csv';
-teamsdetails = importteamsdetails(filename);
+team_details = readtable(filename);
 
 % Events, 11 columns:
 % start_x: where, in x, did the event start [units?]
@@ -41,7 +41,7 @@ teamsdetails = importteamsdetails(filename);
 % success: success or failure of a given event
 % explain NaN's
 filename = 'events.csv';
-events = importevents(filename);
+events = readtable(filename);
 
 % Players positions
 % frame: ????
@@ -50,7 +50,7 @@ events = importevents(filename);
 % x: position in x for a given player
 % y: position in y for a given player
 filename = 'players_positions_short.csv';
-playerspositions = importplayerspositions(filename);
+players_positions = readtable(filename);
 
 % Players details, 8 columns
 % player_id: Player identifier.
@@ -61,14 +61,14 @@ playerspositions = importplayerspositions(filename);
 % position_line: ???
 % position_wing: ???
 filename = 'players_details.csv';
-playersdetails = importplayersdetails(filename);
+players_details = readtable(filename);
 
 % Game details, 15 columns
 % Only relevant columns are 5th and 6th  that tell us the dimensions of the field. 
 % And the last eight that help us trim the data removing the irrelevant information.
 % To be improved
 filename = 'game_details.csv';
-gamedetails = importgamedetails(filename);
+game_details = readtable(filename);
 
 % Ball position & possessions, 5 columns
 % frame: Frame identifier.
@@ -77,7 +77,7 @@ gamedetails = importgamedetails(filename);
 % y: Lateral direction.
 % team_id: Team in position of the ball.
 filename = 'ball_positions_and_game_context_short.csv';
-ballpositionsandgamecontext = importball(filename);
+ball_positions_possessions = readtable(filename);
 
 %% Data parse 
 
