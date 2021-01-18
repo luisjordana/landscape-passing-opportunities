@@ -79,6 +79,56 @@ game_details = readtable(filename);
 filename = 'ball_positions_and_game_context_short.csv';
 ball_positions_possessions = readtable(filename);
 
+%% Data formatting
+
+% starting 11's - Team_A
+% row_list correspond to row in player_details table
+row_list = [15,19,18,16,17,24,23,21,20,22,25];
+id_start11_TeamA = players_details{row_list,1};
+
+% starting 11's - Team_B
+% row_list correspond to row in player_details table
+row_list = [1,6,3,4,2,5,9,8,7,11,10];
+id_start11_TeamA = players_details{row_list,1};
+
+% pitch positions
+position_list = {'GK','LB','CB1','CB2','RB','LW','CM','MF1','MF2','RW','ST'};
+
+Team_A.x =table(); Team_A.y =table();
+Team_B.x =table(); Team_B.y =table();
+for i = 1:length(position_list)
+    % time filtering (only first half)
+    ix_time = (players_positions.frame >= game_details.kick_off_ht1 & ...
+        players_positions.frame <= game_details.ht1_frame_end);
+    
+    % player filtering - Team_A
+    ix_player = players_positions.id == id_start11_TeamA(i);
+       
+    Team_A.x.(position_list{i}) = ...
+        players_positions.x(ix_time & ix_player);
+    Team_A.y.(position_list{i}) = ...
+        players_positions.y(ix_time & ix_player);
+    
+    % player filtering - Team_B
+    ix_player = players_positions.id == id_start11_TeamB(i); 
+       
+    Team_B.x.(position_list{i}) = ...
+        players_positions.x(ix_time & ix_player);
+    Team_B.y.(position_list{i}) = ...
+        players_positions.y(ix_time & ix_player);
+end
+
+% ball
+ix_time = (ball_positions_possessions.frame >= game_details.kick_off_ht1 & ...
+    ball_positions_possessions.frame <= game_details.ht1_frame_end);
+
+ball = table();
+ball.x = ball_positions_possessions.x(ix_time);
+ball.y = ball_positions_possessions.y(ix_time);
+
+frames = ball_positions_possessions.frame(ix_time);
+
+
 %% Data parse 
 
 %First we parse the pass events and the conductions. We only need these two
@@ -97,194 +147,12 @@ for i=1:length(events)
     end
 end
 
-% Using the information available in playerdetails we parse players
-% position into the 11 players each team has. 
-GK_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(15,1)),:);
-RB_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(17,1)),:);
-LB_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(19,1)),:);
-CB1_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(18,1)),:);
-CB2_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(16,1)),:);
-MF1_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(21,1)),:);
-LW_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(24,1)),:);
-CM_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(23,1)),:);
-MF2_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(20,1)),:);
-ST_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(25,1)),:);
-RW_TeamA=playerspositions(find(playerspositions(:,3)==playersdetails(22,1)),:);
-
-GK_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(1,1)),:);
-LB_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(6,1)),:);
-CB1_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(3,1)),:);
-CB2_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(4,1)),:);
-RB_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(2,1)),:);
-LW_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(5,1)),:);
-CM_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(9,1)),:);
-MF1_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(8,1)),:);
-MF2_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(7,1)),:);
-RW_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(11,1)),:);
-ST_TeamB=playerspositions(find(playerspositions(:,3)==playersdetails(10,1)),:);
-
 fs=25; % frequency sampling, Hz
 dt=1/fs;
 frame1sthalf=gamedetails(10);
 frame2ndhalf=gamedetails(14);
 
-% velocity, x-axis, Team_A
-GK_TeamA(1:end-1,7)= diff(GK_TeamA(:,4))/dt;
-RB_TeamA(1:end-1,7)=diff(RB_TeamA(:,4))/dt;
-CB1_TeamA(1:end-1,7)=diff(CB1_TeamA(:,4))/dt;
-CB2_TeamA(1:end-1,7)=diff(CB2_TeamA(:,4))/dt;
-LB_TeamA(1:end-1,7)=diff(LB_TeamA(:,4))/dt;
-CM_TeamA(1:end-1,7)=diff(CM_TeamA(:,4))/dt;
-MF1_TeamA(1:end-1,7)=diff(MF1_TeamA(:,4))/dt;
-MF2_TeamA(1:end-1,7)=diff(MF2_TeamA(:,4))/dt;
-LW_TeamA(1:end-1,7)=diff(LW_TeamA(:,4))/dt;
-ST_TeamA(1:end-1,7)=diff(ST_TeamA(:,4))/dt;
-RW_TeamA(1:end-1,7)=diff(RW_TeamA(:,4))/dt;
 
-% velocity, y-axis, Team_A
-GK_TeamA(1:end-1,8)= diff(GK_TeamA(:,5))/dt;
-RB_TeamA(1:end-1,8)=diff(RB_TeamA(:,5))/dt;
-CB1_TeamA(1:end-1,8)=diff(CB1_TeamA(:,5))/dt;
-CB2_TeamA(1:end-1,8)=diff(CB2_TeamA(:,5))/dt;
-LB_TeamA(1:end-1,8)=diff(LB_TeamA(:,5))/dt;
-CM_TeamA(1:end-1,8)=diff(CM_TeamA(:,5))/dt;
-MF1_TeamA(1:end-1,8)=diff(MF1_TeamA(:,5))/dt;
-MF2_TeamA(1:end-1,8)=diff(MF2_TeamA(:,5))/dt;
-LW_TeamA(1:end-1,8)=diff(LW_TeamA(:,5))/dt;
-ST_TeamA(1:end-1,8)=diff(ST_TeamA(:,5))/dt;
-RW_TeamA(1:end-1,8)=diff(RW_TeamA(:,5))/dt;
-
-% velocity, absolute value, Team_A
-GK_TeamA(:,9)= sqrt( GK_TeamA(:,7).^2+GK_TeamA(:,8).^2);
-RB_TeamA(:,9)=sqrt( RB_TeamA(:,7).^2+RB_TeamA(:,8).^2);
-CB1_TeamA(:,9)=sqrt( CB1_TeamA(:,7).^2+CB1_TeamA(:,8).^2);
-CB2_TeamA(:,9)=sqrt( CB2_TeamA(:,7).^2+CB2_TeamA(:,8).^2);
-LB_TeamA(:,9)=sqrt( LB_TeamA(:,7).^2+LB_TeamA(:,8).^2);
-CM_TeamA(:,9)=sqrt( CM_TeamA(:,7).^2+CM_TeamA(:,8).^2);
-MF1_TeamA(:,9)=sqrt( MF1_TeamA(:,7).^2+MF1_TeamA(:,8).^2);
-MF2_TeamA(:,9)=sqrt( MF2_TeamA(:,7).^2+MF2_TeamA(:,8).^2);
-LW_TeamA(:,9)=sqrt( LW_TeamA(:,7).^2+LW_TeamA(:,8).^2);
-ST_TeamA(:,9)=sqrt( ST_TeamA(:,7).^2+ST_TeamA(:,8).^2);
-RW_TeamA(:,9)=sqrt( RW_TeamA(:,7).^2+RW_TeamA(:,8).^2);
-
-% acceleration, x-axis, Team_A
-GK_TeamA(1:end-1,10)= diff(GK_TeamA(:,7))/dt;
-RB_TeamA(1:end-1,10)=diff(RB_TeamA(:,7))/dt;
-CB1_TeamA(1:end-1,10)=diff(CB1_TeamA(:,7))/dt;
-CB2_TeamA(1:end-1,10)=diff(CB2_TeamA(:,7))/dt;
-LB_TeamA(1:end-1,10)=diff(LB_TeamA(:,7))/dt;
-CM_TeamA(1:end-1,10)=diff(CM_TeamA(:,7))/dt;
-MF1_TeamA(1:end-1,10)=diff(MF1_TeamA(:,7))/dt;
-MF2_TeamA(1:end-1,10)=diff(MF2_TeamA(:,7))/dt;
-LW_TeamA(1:end-1,10)=diff(LW_TeamA(:,7))/dt;
-ST_TeamA(1:end-1,10)=diff(ST_TeamA(:,7))/dt;
-RW_TeamA(1:end-1,10)=diff(RW_TeamA(:,7))/dt;
-
-% acceleration, y-axis, Team_A
-GK_TeamA(1:end-1,11)= diff(GK_TeamA(:,8))/dt;
-RB_TeamA(1:end-1,11)=diff(RB_TeamA(:,8))/dt;
-CB1_TeamA(1:end-1,11)=diff(CB1_TeamA(:,8))/dt;
-CB2_TeamA(1:end-1,11)=diff(CB2_TeamA(:,8))/dt;
-LB_TeamA(1:end-1,11)=diff(LB_TeamA(:,8))/dt;
-CM_TeamA(1:end-1,11)=diff(CM_TeamA(:,8))/dt;
-MF1_TeamA(1:end-1,11)=diff(MF1_TeamA(:,8))/dt;
-MF2_TeamA(1:end-1,11)=diff(MF2_TeamA(:,8))/dt;
-LW_TeamA(1:end-1,11)=diff(LW_TeamA(:,8))/dt;
-ST_TeamA(1:end-1,11)=diff(ST_TeamA(:,8))/dt;
-RW_TeamA(1:end-1,11)=diff(RW_TeamA(:,8))/dt;
-
-% acceleration, absolute value, Team_A
-GK_TeamA(:,12)= sqrt( GK_TeamA(:,10).^2+GK_TeamA(:,11).^2);
-RB_TeamA(:,12)=sqrt( RB_TeamA(:,10).^2+RB_TeamA(:,11).^2);
-CB1_TeamA(:,12)=sqrt( CB1_TeamA(:,10).^2+CB1_TeamA(:,11).^2);
-CB2_TeamA(:,12)=sqrt( CB2_TeamA(:,10).^2+CB2_TeamA(:,11).^2);
-LB_TeamA(:,12)=sqrt( LB_TeamA(:,10).^2+LB_TeamA(:,11).^2);
-CM_TeamA(:,12)=sqrt( CM_TeamA(:,10).^2+CM_TeamA(:,11).^2);
-MF1_TeamA(:,12)=sqrt( MF1_TeamA(:,10).^2+MF1_TeamA(:,11).^2);
-MF2_TeamA(:,12)=sqrt( MF2_TeamA(:,10).^2+MF2_TeamA(:,11).^2);
-LW_TeamA(:,12)=sqrt( LW_TeamA(:,10).^2+LW_TeamA(:,11).^2);
-ST_TeamA(:,12)=sqrt( ST_TeamA(:,10).^2+ST_TeamA(:,11).^2);
-RW_TeamA(:,12)=sqrt( RW_TeamA(:,10).^2+RW_TeamA(:,11).^2);
-
-% velocity, x-axis, Team_B
-GK_TeamB(1:end-1,7)= diff(GK_TeamB(:,4))/dt;
-RB_TeamB(1:end-1,7)=diff(RB_TeamB(:,4))/dt;
-CB1_TeamB(1:end-1,7)=diff(CB1_TeamB(:,4))/dt;
-CB2_TeamB(1:end-1,7)=diff(CB2_TeamB(:,4))/dt;
-LB_TeamB(1:end-1,7)=diff(LB_TeamB(:,4))/dt;
-LW_TeamB(1:end-1,7)=diff(LW_TeamB(:,4))/dt;
-CM_TeamB(1:end-1,7)=diff(CM_TeamB(:,4))/dt;
-MF1_TeamB(1:end-1,7)=diff(MF1_TeamB(:,4))/dt;
-MF2_TeamB(1:end-1,7)=diff(MF2_TeamB(:,4))/dt;
-RW_TeamB(1:end-1,7)=diff(RW_TeamB(:,4))/dt;
-ST_TeamB(1:end-1,7)=diff(ST_TeamB(:,4))/dt;
-
-% velocity, y-axis, Team_B
-GK_TeamB(1:end-1,8)= diff(GK_TeamB(:,5))/dt;
-RB_TeamB(1:end-1,8)=diff(RB_TeamB(:,5))/dt;
-CB1_TeamB(1:end-1,8)=diff(CB1_TeamB(:,5))/dt;
-CB2_TeamB(1:end-1,8)=diff(CB2_TeamB(:,5))/dt;
-LB_TeamB(1:end-1,8)=diff(LB_TeamB(:,5))/dt;
-LW_TeamB(1:end-1,8)=diff(LW_TeamB(:,5))/dt;
-CM_TeamB(1:end-1,8)=diff(CM_TeamB(:,5))/dt;
-MF1_TeamB(1:end-1,8)=diff(MF1_TeamB(:,5))/dt;
-MF2_TeamB(1:end-1,8)=diff(MF2_TeamB(:,5))/dt;
-RW_TeamB(1:end-1,8)=diff(RW_TeamB(:,5))/dt;
-ST_TeamB(1:end-1,8)=diff(ST_TeamB(:,5))/dt;
-
-% velocity, absolute value, Team_B
-GK_TeamB(:,9)= sqrt( GK_TeamB(:,7).^2+GK_TeamB(:,8).^2);
-RB_TeamB(:,9)=sqrt( RB_TeamB(:,7).^2+RB_TeamB(:,8).^2);
-CB1_TeamB(:,9)=sqrt( CB1_TeamB(:,7).^2+CB1_TeamB(:,8).^2);
-CB2_TeamB(:,9)=sqrt( CB2_TeamB(:,7).^2+CB2_TeamB(:,8).^2);
-LB_TeamB(:,9)=sqrt( LB_TeamB(:,7).^2+LB_TeamB(:,8).^2);
-LW_TeamB(:,9)=sqrt( LW_TeamB(:,7).^2+LW_TeamB(:,8).^2);
-CM_TeamB(:,9)=sqrt( CM_TeamB(:,7).^2+CM_TeamB(:,8).^2);
-MF1_TeamB(:,9)=sqrt( MF1_TeamB(:,7).^2+MF1_TeamB(:,8).^2);
-MF2_TeamB(:,9)=sqrt( MF2_TeamB(:,7).^2+MF2_TeamB(:,8).^2);
-RW_TeamB(:,9)=sqrt( RW_TeamB(:,7).^2+RW_TeamB(:,8).^2);
-ST_TeamB(:,9)=sqrt( ST_TeamB(:,7).^2+ST_TeamB(:,8).^2);
-
-% acceleration, x-axis, Team_B
-GK_TeamB(1:end-1,10)= diff(GK_TeamB(:,7))/dt;
-RB_TeamB(1:end-1,10)=diff(RB_TeamB(:,7))/dt;
-CB1_TeamB(1:end-1,10)=diff(CB1_TeamB(:,7))/dt;
-CB2_TeamB(1:end-1,10)=diff(CB2_TeamB(:,7))/dt;
-LB_TeamB(1:end-1,10)=diff(LB_TeamB(:,7))/dt;
-LW_TeamB(1:end-1,10)=diff(LW_TeamB(:,7))/dt;
-CM_TeamB(1:end-1,10)=diff(CM_TeamB(:,7))/dt;
-MF1_TeamB(1:end-1,10)=diff(MF1_TeamB(:,7))/dt;
-MF2_TeamB(1:end-1,10)=diff(MF2_TeamB(:,7))/dt;
-RW_TeamB(1:end-1,10)=diff(RW_TeamB(:,7))/dt;
-ST_TeamB(1:end-1,10)=diff(ST_TeamB(:,7))/dt;
-
-% acceleration, y-axis, Team_B
-GK_TeamB(1:end-1,11)= diff(GK_TeamB(:,8))/dt;
-RB_TeamB(1:end-1,11)=diff(RB_TeamB(:,8))/dt;
-CB1_TeamB(1:end-1,11)=diff(CB1_TeamB(:,8))/dt;
-CB2_TeamB(1:end-1,11)=diff(CB2_TeamB(:,8))/dt;
-LB_TeamB(1:end-1,11)=diff(LB_TeamB(:,8))/dt;
-LW_TeamB(1:end-1,11)=diff(LW_TeamB(:,8))/dt;
-CM_TeamB(1:end-1,11)=diff(CM_TeamB(:,8))/dt;
-MF1_TeamB(1:end-1,11)=diff(MF1_TeamB(:,8))/dt;
-MF2_TeamB(1:end-1,11)=diff(MF2_TeamB(:,8))/dt;
-RW_TeamB(1:end-1,11)=diff(RW_TeamB(:,8))/dt;
-ST_TeamB(1:end-1,11)=diff(ST_TeamB(:,8))/dt;
-
-% acceleration, absolute value, Team_B
-GK_TeamB(:,12)= sqrt( GK_TeamB(:,10).^2+GK_TeamB(:,11).^2);
-RB_TeamB(:,12)=sqrt( RB_TeamB(:,10).^2+RB_TeamB(:,11).^2);
-CB1_TeamB(:,12)=sqrt( CB1_TeamB(:,10).^2+CB1_TeamB(:,11).^2);
-CB2_TeamB(:,12)=sqrt( CB2_TeamB(:,10).^2+CB2_TeamB(:,11).^2);
-LB_TeamB(:,12)=sqrt( LB_TeamB(:,10).^2+LB_TeamB(:,11).^2);
-LW_TeamB(:,12)=sqrt( LW_TeamB(:,10).^2+LW_TeamB(:,11).^2);
-CM_TeamB(:,12)=sqrt( CM_TeamB(:,10).^2+CM_TeamB(:,11).^2);
-MF1_TeamB(:,12)=sqrt( MF1_TeamB(:,10).^2+MF1_TeamB(:,11).^2);
-MF2_TeamB(:,12)=sqrt( MF2_TeamB(:,10).^2+MF2_TeamB(:,11).^2);
-RW_TeamB(:,12)=sqrt( RW_TeamB(:,10).^2+RW_TeamB(:,11).^2);
-ST_TeamB(:,12)=sqrt( ST_TeamB(:,10).^2+ST_TeamB(:,11).^2);
-
-clearvars playerspositions
 
 %% First cut 
 %Using the information avaialable in Gamedetails we eliminate the
