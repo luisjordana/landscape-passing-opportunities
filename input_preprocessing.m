@@ -229,39 +229,49 @@ for i=1:11
     y_TeamA(:,i)=resample(y_TeamA(:,i),1:length(y_TeamA(:,i)));
 end
 
-%% filtrar sgoaly: dos filtros un filtro sobre la posicion, un filtro sobre la velocidad.
+%% removing noise: smoothing timeseries using sgoaly function
 
 %Now with clean data we use a geometrical filter and differentiate the data
 %to obtain velocities. 
-x_TeamA=sgolayfilt(x_TeamA,4,25);
-y_TeamA=sgolayfilt(y_TeamA,4,25);
-x_TeamB=sgolayfilt(x_TeamB,4,25);
-y_TeamB=sgolayfilt(y_TeamB,4,25);
+Team_A.x = array2table(sgolayfilt(Team_A.x{:,:},4,25),...
+    'VariableNames',position_list);
+Team_A.y = array2table(sgolayfilt(Team_A.y{:,:},4,25),...
+    'VariableNames',position_list);
 
-vx_TeamA=diff(x_TeamA)/dt;
-vy_TeamA=diff(y_TeamA)/dt;
-vx_TeamB=diff(x_TeamB)/dt;
-vy_TeamB=diff(y_TeamB)/dt;
+Team_B.x = array2table(sgolayfilt(Team_B.x{:,:},4,25),...
+    'VariableNames',position_list);
+Team_B.y = array2table(sgolayfilt(Team_B.y{:,:},4,25),...
+    'VariableNames',position_list);
 
-vx_TeamA=sgolayfilt(vx_TeamA,4,25);
-vy_TeamA=sgolayfilt(vy_TeamA,4,25);
-vx_TeamB=sgolayfilt(vx_TeamB,4,25);
-vy_TeamB=sgolayfilt(vy_TeamB,4,25);
-vt_TeamA=sqrt(vx_TeamA.^2+vy_TeamA.^2);
-vt_TeamB=sqrt(vx_TeamB.^2+vy_TeamB.^2);
+Team_A.v_x = array2table([sgolayfilt(diff(Team_A.x{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.v_y = array2table([sgolayfilt(diff(Team_A.y{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
 
-ax_TeamA=diff(vx_TeamA)/dt;
-ay_TeamA=diff(vy_TeamA)/dt;
-ax_TeamB=diff(vx_TeamB)/dt;
-ay_TeamB=diff(vy_TeamB)/dt;
+Team_B.v_x = array2table([sgolayfilt(diff(Team_B.x{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.v_y = array2table([sgolayfilt(diff(Team_B.y{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
 
-ax_TeamA=sgolayfilt(ax_TeamA,4,25);
-ay_TeamA=sgolayfilt(ay_TeamA,4,25);
-ax_TeamB=sgolayfilt(ax_TeamB,4,25);
-ay_TeamB=sgolayfilt(ay_TeamB,4,25);
+Team_A.v_total = array2table(sqrt(Team_A.v_x{:,:}.^2 + Team_A.v_y{:,:}.^2),...
+    'VariableNames',position_list);
+Team_B.v_total = array2table(sqrt(Team_B.v_x{:,:}.^2 + Team_B.v_y{:,:}.^2),...
+    'VariableNames',position_list);
 
-at_TeamA=sqrt(ax_TeamA.^2+ay_TeamA.^2);
-at_TeamB=sqrt(ax_TeamB.^2+ay_TeamB.^2);
+Team_A.a_x = array2table([sgolayfilt(diff(Team_A.v_x{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_A.a_y = array2table([sgolayfilt(diff(Team_A.v_y{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+
+Team_B.a_x = array2table([sgolayfilt(diff(Team_B.v_x{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+Team_B.a_y = array2table([sgolayfilt(diff(Team_B.v_y{:,:}),4,25); nan(1,11)]/dt,...
+    'VariableNames',position_list);
+
+Team_A.a_total = array2table(sqrt(Team_A.a_x{:,:}.^2 + Team_A.a_y{:,:}.^2),...
+    'VariableNames',position_list);
+Team_B.a_total = array2table(sqrt(Team_B.a_x{:,:}.^2 + Team_B.a_y{:,:}.^2),...
+    'VariableNames',position_list);
 
 % high velocity percentiles (used later on)
 vt_TeamA_prct99_95 = prctile(vt_TeamA, 99.95);
