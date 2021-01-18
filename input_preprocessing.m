@@ -209,24 +209,24 @@ clearvars playerspositions
 %Meaning we remove the irreal peaks related to noise. and resample the data
 %once this peaks are remove.
 
-for i=1:11
-    x_TeamB(find(vt_TeamB_c(:,i)>prctile(vt_TeamB_c(:,i), 95)))=nan;
-    y_TeamB(find(vt_TeamB_c(:,i)>prctile(vt_TeamB_c(:,i), 95)))=nan;
-    x_TeamA(find(vt_TeamA_c(:,i)>prctile(vt_TeamA_c(:,i), 95)))=nan;
-    y_TeamA(find(vt_TeamA_c(:,i)>prctile(vt_TeamA_c(:,i), 95)))=nan;
-end
+Team_A_v_perc95 = prctile(Team_A.v_total{:,:},95);
+Team_B_v_perc95 = prctile(Team_B.v_total{:,:},95);
 
-for i=1:11
-    x_TeamB(find(vt_TeamB_c(:,i)>prctile(at_TeamB_c(:,i), 95)))=nan;
-    y_TeamB(find(vt_TeamB_c(:,i)>prctile(at_TeamB_c(:,i), 95)))=nan;
-    x_TeamA(find(vt_TeamA_c(:,i)>prctile(at_TeamA_c(:,i), 95)))=nan;
-    y_TeamA(find(vt_TeamA_c(:,i)>prctile(at_TeamA_c(:,i), 95)))=nan;
-end
-for i=1:11
-    x_TeamB(:,i)=resample(x_TeamB(:,i),1:length(x_TeamB(:,i)));
-    y_TeamB(:,i)=resample(y_TeamB(:,i),1:length(y_TeamB(:,i)));
-    x_TeamA(:,i)=resample(x_TeamA(:,i),1:length(x_TeamA(:,i)));
-    y_TeamA(:,i)=resample(y_TeamA(:,i),1:length(y_TeamA(:,i)));
+% do the same for acceleration?
+for player = 1:11
+    ix_Team_A = Team_A.v_total{:,player} > Team_A_v_perc95(player);
+    ix_Team_B = Team_B.v_total{:,player} > Team_B_v_perc95(player);
+    
+    Team_A.x{ix_Team_A,player} = nan;
+    Team_A.y{ix_Team_A,player} = nan;
+    Team_B.x{ix_Team_B,player} = nan;
+    Team_B.y{ix_Team_B,player} = nan;
+    
+    Team_A.x{:,player} = resample(Team_A.x{:,player},1:size(Team_A.x));
+    Team_A.y{:,player} = resample(Team_A.y{:,player},1:size(Team_A.x));
+
+    Team_B.x{:,player} = resample(Team_B.x{:,player},1:size(Team_B.x));
+    Team_B.y{:,player} = resample(Team_B.y{:,player},1:size(Team_B.x));
 end
 
 %% removing noise: smoothing timeseries using sgoaly function
@@ -370,6 +370,7 @@ for pp = 1:11
     ix = temp == list(pp,1) | temp == list(pp,2);
     ball.possession_player_id2(ix) = list(pp,3);
 end
+
 
 
 % filters plays under study from 25 to 5 Hz to reduce noise
