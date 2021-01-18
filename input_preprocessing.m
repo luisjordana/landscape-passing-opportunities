@@ -20,23 +20,63 @@ folder = fileparts(which(mfilename));
 addpath(genpath(folder));
 
 %% read data
+% Team_details, 2 columns:
+% id: team identifier.
+% name: name of the team
 filename = 'teams_details.csv';
 teamsdetails = importteamsdetails(filename);
 
+% Events, 11 columns:
+% start_x: where, in x, did the event start [units?]
+% start_y: where, in y, did the event start [units?]
+% end_x: where, in x, did the event end [units?]
+% end_y: where, in y, did the event end [units?]
+% event_type_id: type of event
+% player_id: identifier of the player who performed the event.
+% target_player_id: identifier of a second player who also participated in the event 
+% (applicable only in event types (e.g. the player receiving a pass)
+% start_frame: frame, in time, when the event started.
+% end_frame: frame, in time, when the event ended.
+% team_id: identifier of the participating player's team
+% success: success or failure of a given event
+% explain NaN's
 filename = 'events.csv';
 events = importevents(filename);
 
+% Players positions
+% frame: ????
+% time: ????
+% id: identifier of a given player
+% x: position in x for a given player
+% y: position in y for a given player
 filename = 'players_positions_short.csv';
 playerspositions = importplayerspositions(filename);
 
+% Players details, 8 columns
+% player_id: Player identifier.
+% team_id: team identifier.
+% frame_start: Frame when the player enter the field.
+% frame_end: When the player left the field. 
+% The rest of the columns are irrelevant.
+% position_line: ???
+% position_wing: ???
 filename = 'players_details.csv';
 playersdetails = importplayersdetails(filename);
 
+% Game details, 15 columns
+% Only relevant columns are 5th and 6th  that tell us the dimensions of the field. 
+% And the last eight that help us trim the data removing the irrelevant information.
+% To be improved
 filename = 'game_details.csv';
 gamedetails = importgamedetails(filename);
 
+% Ball position & possessions, 5 columns
+% frame: Frame identifier.
+% time: Time
+% x: Longitudinal direction.
+% y: Lateral direction.
+% team_id: Team in position of the ball.
 filename = 'ball_positions_and_game_context_short.csv';
-% filename = 'ball_positions_and_game_context_short.csv';
 ballpositionsandgamecontext = importball(filename);
 
 %% Data parse 
