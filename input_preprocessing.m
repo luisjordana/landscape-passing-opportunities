@@ -273,16 +273,12 @@ vt_TeamB_prct99_95 = prctile(vt_TeamB, 99.95);
 % of the team that posses the ball. To do so we start by using the variable
 % ball that includes a coloumn with a team code that correspond to each
 % team 
-teamballowner(1:length(ball))=0;
-ballowner(1:length(ball))=0;
-for i=1:length(ball)
-   if ball(i,5)==554
-       teamballowner(i)=1;
-   end
-   if ball(i,5)==475
-       teamballowner(i)=2;
-   end       
-end
+ball.possession_team_id = ball_positions_possessions.team_id(ix_time);
+
+% -1 -> 0, 554 -> 1, 475 -> 2
+ball.possession_team_id(ball.possession_team_id == -1) = 0;
+ball.possession_team_id(ball.possession_team_id == 554) = 1;
+ball.possession_team_id(ball.possession_team_id == 475) = 2;
 
 %Then using the identifier of the conductions we build up a ballowner
 %variable that is then transform in a position (1-11) depending on which
