@@ -494,7 +494,7 @@ for i=1:length(ballowner)
       end
 end
 
-% filters plays under study
+% filters plays under study from 25 to 5 Hz to reduce noise
 ix = [1:5:1125 2600:5:3150];
 x_TeamA = x_TeamA(ix,:);
 y_TeamA = y_TeamA(ix,:);
