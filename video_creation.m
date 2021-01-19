@@ -20,8 +20,11 @@ In1BAR1(1:196,1:301,1:length(1:300))=0;
 In3BAR1(1:196,1:301,1:length(1:300))=0;
 In4BAR1(1:196,1:301,1:length(1:300))=0;
 
-%We follow the same procedure as the one we used when we create the
-%heatmap.
+%We follow the same procedure as the one we used when we created the
+%heatmap. The only difference is in this case we used the matrix of three 
+%dimmension. The new dimmension of our heatmaps will be equal to the time
+%we are gonna record a video for, working each point of the matrix as a 
+%instant of the video.
 for i=2:length(Jgadas1(1:336))
     In1BAR1(:,:,i)=In1BAR1(:,:,i-1);
     In3BAR1(:,:,i)=In3BAR1(:,:,i-1);
@@ -215,17 +218,14 @@ colormap(jet(100))
 cb=1;
 cos=1;
 
-% First video First halg
+% Using the same logic as the one used to create the heatmaps we plot these poligons over the position of players. Potentiall the three heatmaps
+% as well as the three type of passes could be shown at the same time. But we choose to plot one pass at a time. To do so, we comment and uncomment
+% the parts of the code corresponding to each type of pass.
 for i=1:336
     subplot(2,1,1)
-    %     clc
-    %     lalla= subplot(2,2,3);
-    %     if i~=1
-    %     cla(lalla)
-    %     end
-    %     subplot(2,2,1)
     fill([-20 -20 120 120],[-10 80 80 -10],'g')
     hold on
+    % Plot the two teams positions as well as their velocities.
     scatter(results4.x_TeamA(i,:), results4.y_TeamA(i,:),'r')
     scatter(results4.x_TeamB(i,:), results4.y_TeamB(i,:),'b')
     for l=1:11
@@ -405,94 +405,42 @@ for i=1:336
             end
         end
     end
-    %      if results4.ballowner(i)~=0
-    %         if results4.teamballowner(i)==2
-    %
-    %
-    %         if results4.counterf(i)~=0
-    %             for q=1:results4.counterf(i)
-    %             %    plot([results4.x_TeamB(results4.Jgadas2(i),results4.teamballowner(i)) results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i))],[results4.y_TeamB(i,results4.teamballowner(i)) results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i))], 'k')
-    %                  if mod(results4.FDef(i,1+(2*(q-1))),1)==0 && mod(results4.FDef(i,2+(2*(q-1))),1)==0 && abs(results4.FDef(i,1+(2*(q-1)),1))<12 && abs(results4.FDef(i,2+(2*(q-1))))<12 && results4.FDef(i,1+(2*(q-1)))>0 && results4.FDef(i,2+(2*(q-1)))>0
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+1))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+1))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+2))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+2))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+1))],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+1))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+2))],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+2))],'k--')
-    %                  end
-    %
-    %                  if mod(results4.FDef(i,1+(2*(q-1))),1)~=0 && mod(results4.FDef(i,2+(2*(q-1))),1)==0
-    %                     plot([results4.x_TeamB(i,results4.ballowner(i)) results4.FDef(i,((q-1)*2)+1)],[results4.y_TeamB(i,results4.ballowner(i)) 74.37],'k')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+2))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+2))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) results4.FDef(i,1+(2*(q-1)))],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) 74.37],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+2))],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+2))],'k--')
-    %                  end
-    %                  if mod(results4.FDef(i,2+(2*(q-1))),1)~=0 && mod(results4.FDef(i,1+(2*(q-1))),1)==0
-    %                      plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+1))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+1))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) -results4.FDef(i,((q-1)*2)+2)],[results4.y_TeamB(i,results4.ballowner(i)) 0],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) results4.x_TeamA(i, results4.FDef(i,((q-1)*2)+1))],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) results4.y_TeamA(i, results4.FDef(i,((q-1)*2)+1))],'k--')
-    %                       plot([results4.x_TeamB(i,results4.indexf(q,i))+results4.vx_TeamB(i,results4.indexf(q,i)) -results4.FDef(i,((q-1)*2)+2)],[results4.y_TeamB(i,results4.indexf(q,i))-results4.vy_TeamB(i,results4.indexf(q,i)) 0],'k--')
-    %                  end
-    %             end
-    %         end
-    %          for p=1:results4.counter(i)
-    %                  if mod(results4.Def(i,1+(2*(p-1))),1)==0 && mod(results4.Def(i,2+(2*(p-1))),1)==0 && abs(results4.Def(i,1+(2*(p-1)),1))<12 && abs(results4.Def(i,2+(2*(p-1))))<12
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+1))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+1))],'k')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+2))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+2))],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+1))],[results4.y_TeamB(i,results4.index(p,i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+1))],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+2))],[results4.y_TeamB(i,results4.index(p,i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+2))],'k')
-    %                 end
-    %
-    %                  if mod(results4.Def(i,1+(2*(p-1))),1)~=0 && mod(results4.Def(i,2+(2*(p-1))),1)==0
-    %                     plot([results4.x_TeamB(i,results4.ballowner(i)) results4.Def(i,((p-1)*2)+1)],[results4.y_TeamB(i,results4.ballowner(i)) 74.37],'k')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+2))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+2))],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) results4.Def(i,1+(2*(p-1)))],[results4.y_TeamB(i,results4.index(p,i)) 74.37],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+2))],[results4.y_TeamB(i,results4.index(p,i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+2))],'k')
-    %                  end
-    %                  if mod(results4.Def(i,2+(2*(p-1))),1)~=0 && mod(results4.Def(i,1+(2*(p-1))),1)==0
-    %                      plot([results4.x_TeamB(i,results4.ballowner(i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+1))],[results4.y_TeamB(i,results4.ballowner(i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+1))],'k')
-    %                       plot([results4.x_TeamB(i,results4.ballowner(i)) -results4.Def(i,((p-1)*2)+2)],[results4.y_TeamB(i,results4.ballowner(i)) 0],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) results4.x_TeamA(i, results4.Def(i,((p-1)*2)+1))],[results4.y_TeamB(i,results4.index(p,i)) results4.y_TeamA(i, results4.Def(i,((p-1)*2)+1))],'k')
-    %                       plot([results4.x_TeamB(i,results4.index(p,i)) -results4.Def(i,((p-1)*2)+2)],[results4.y_TeamB(i,results4.index(p,i)) 0],'k')
-    %                  end
-    %
-    %
-    %             end
-    %         end
-    
+   
     scatter(results4.xball(i),results4.yball(i),20,'k','fill')
-    plot([0 0],[0 74.37],'-w')
-    plot([114.83 114.83],[0 74.37],'-w')
-    plot([0 114.83],[0 0],'-w')
-    plot([0 114.83],[74.37 74.37],'-w')
-    plot([57.4150 57.4150],[0 74.37],'-w')
+    plot([0 0],[0 72.1],'-w')
+    plot([107.71 107.71],[0 72.1],'-w')
+    plot([0 107.71],[0 0],'-w')
+    plot([0 107.71],[72.1 72.1],'-w')
+    plot([53.855 53.855],[0 72.1],'-w')
     
     %circulo central
-    plot (circulocentralx+57.4150, circulocentraly+37.1850,'-w', -circulocentralx+57.4150,-circulocentraly+37.1850,'-w')
-    plot(57.4150,37.1850,'.w')
+    plot (circulocentralx+53.855, circulocentraly+36.05,'-w', -circulocentralx+53.855,-circulocentraly+36.05,'-w')
+    plot(53.855,36.05,'.w')
     %areas
-    plot (circuloareax(1:74)+103.83, circuloareay(1:74)+37.1850,'-w', -circuloareax(294:367)+103.83,-circuloareay(294:367)+37.1850,'-w')
-    plot([98.3300 114.83], [17.025 17.025],'-w')
-    plot([98.3300  114.83], [57.3450 57.3450],'-w')
-    plot([98.3300 98.3300], [17.025 57.3450],'-w')
-    plot([109.3300 114.8300], [28.0250 28.0250],'-w')
-    plot([109.3300 114.8300], [46.3450 46.3450],'-w')
-    plot([109.3300 109.3300], [28.0250 46.3450],'-w')
-    plot(103.83,37.1850,'.w')
+    plot (circuloareax(1:74)+96.71, circuloareay(1:74)+36.05,'-w', -circuloareax(294:367)+96.71,-circuloareay(294:367)+36.05,'-w')
+    plot([91.2100 107.7100], [15.8 15.8],'-w')
+    plot([91.2100  107.7100], [56.30 56.30],'-w')
+    plot([91.2100 91.3300], [15.8 56.30],'-w')
+    plot([102.2100 107.7100], [26.450 26.450],'-w')
+    plot([102.2100 107.7100], [45.650 45.650],'-w')
+    plot([102.2100 102.2100], [26.450 45.650],'-w')
+    plot(96.71,36.05,'.w')
     
-    plot (-circuloareax(1:74)+11, -circuloareay(1:74)+37.1850,'-w', +circuloareax(294:367)+11,+circuloareay(294:367)+37.1850,'-w')
+    plot (-circuloareax(1:74)+11, -circuloareay(1:74)+36.05,'-w', +circuloareax(294:367)+11,+circuloareay(294:367)+36.05,'-w')
     plot([0 16.5], [17.025 17.025],'-w')
     plot([0 16.5], [57.3450 57.3450],'-w')
-    plot([16.5 16.5],[17.025 57.3450],'-w')
-    plot([0 5.5], [28.0250 28.0250],'-w')
-    plot([0 5.5], [46.3450 46.3450],'-w')
-    plot([5.5 5.5], [28.0250 46.3450],'-w')
-    plot(11,37.1850,'.w')
-    axis([-3 117.83 -3 76.37])
+    plot([16.5 16.5],[15.8 56.30],'-w')
+    plot([0 5.5], [26.450 26.450],'-w')
+    plot([0 5.5], [45.650 45.650],'-w')
+    plot([5.5 5.5], [26.450 45.650],'-w')
+    plot(11,36.05,'.w')
+    axis([-3 110.0 -3 74.00])
     hold off
     
     
     %     subplot(2,1,2)
     %
-    %     imagesc([0 100],[0 65],In1BAR1(:,:,i),[0 20])
+    %     imagesc([0 100],[0 65],In1BAR1(:,:,i),[0 10])
     %                    hold on
     %
     %     text(45,73,'Penetrative passes')
@@ -526,7 +474,7 @@ for i=1:336
     %     set(gca,'YDir','normal')
     %     hold off
     subplot(2,1,2)
-    imagesc([0 100],[0 65],In3BAR1(:,:,i),[0 20])
+    imagesc([0 100],[0 65],In3BAR1(:,:,i),[0 10])
     hold on
     text(45,73,'Support passes')
     
@@ -613,6 +561,6 @@ for i=1:length(F1)
     frame = F1(i).cdata ;
     writeVideo(writerObj, frame);
 end
-
+clear(F1)
 % close the writer object
 close(writerObj)
