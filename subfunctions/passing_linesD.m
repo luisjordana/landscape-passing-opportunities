@@ -1,4 +1,6 @@
-function [PR, PRF, Def, FDef, outfieldplayers, Foutfieldplayers]=passing_linesD(xteam1, yteam1, xteam2, yteam2,rx1,ry1,rx2,ry2,newseriesteam2, teamballowner, ballowner, ejected ,half)
+function [PR, PRF, Def, FDef, outfieldplayers, Foutfieldplayers] ...
+    = passing_linesD(xteam1, yteam1, xteam2, yteam2,rx1,ry1,rx2,ry2,newseriesteam2,...
+    teamballowner, ballowner, ejected ,half, distanceBT,distanceFBT,distanceOT)
 %First the varaibles tha are going to be use in the algorithm are created. 
 outfieldplayers(1:11)=0;
 Foutfieldplayers(1:11)=0;
@@ -24,31 +26,6 @@ seg(1:200,1:4)=0;
 %The total velocity of the players in the defensive unit is created. 
 vtteam2=sqrt(rx2.^2+ry2.^2);
 
-%% Distance of two teams to the opposing goal
-% The distance of the players in the two teams to the defensive goal is calculated.
-% This distance is controlled by variables half and teamballowner. (I didn't
-% create in the end and algorithm that work for the two teams but it will
-% just need to be inverted). The Distance to the goal in the future
-% position of the player is also calculated for the offensive team.
-distanceBT(1:11)=0;
-distanceOT(1:11)=0;
-distanceFBT(1:11)=0;
-
-for i=1:11
-    if half==1 && teamballowner==1
-    [distanceBT(i), ~]=distance_passline([0 40.845 ], [0 33.5250], [xteam1(i) yteam1(i)]);
-    [distanceOT(i), ~]=distance_passline([0 40.845 ], [0 33.5250 ], [xteam2(i) yteam2(i)]);
-    [distanceFBT(i), ~]=distance_passline([0 40.845 ], [0 33.5250 ], [xteam1(i)+rx1(i) yteam1(i)+ry1(i)]);
-   
-    end
-    if half==2 && teamballowner==1
-    [distanceBT(i), ~]=distance_passline([114.83 40.845 ], [114.83 33.5250 ], [xteam1(i) yteam1(i)]);
-    [distanceOT(i), ~]=distance_passline([114.83 40.845 ], [114.83 33.5250 ], [xteam2(i) yteam2(i)]);
-    [distanceFBT(i), ~]=distance_passline([114.83 40.845], [114.83 33.5250 ], [xteam1(i)+rx1(i) yteam1(i)+ry1(i)]);
-    end
-end
-
-
 %% For each attacking player how many opposing players are outfield.
 %Using the distane to the goal we calculate the number of players outfield
 %by each attacker. 
@@ -68,9 +45,6 @@ for i=1:11
         end
     end
 end
-
-
-
 
 %% Angles and areas
 %Now using the total velocity of the players we generate areas with 200
