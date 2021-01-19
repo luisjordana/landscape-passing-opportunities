@@ -25,7 +25,7 @@ load('final_results.mat','results4')
 % counterf its builds the polygons. That are then used to build the
 % heatmaps. The vertices of this polygons are saved into x, y, x2...etc
 % depending on the type of pass and save into different matrix that are
-% used in the end iof this script to create the heatmaps.To do so the
+% used in the end if this script to create the heatmaps.To do so the
 % function inpolygon is used.
 for i=2:length(Jgadas1)
     heatmap_penetrative_TeamA(:,:,i) = heatmap_penetrative_TeamA(:,:,i-1);
@@ -35,6 +35,7 @@ for i=2:length(Jgadas1)
     c=1;
     d=1;
     e=1;
+    %With this we ensure the polygons lay outside the field in case we do not have enough passes.
     y=[-10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan];
     x=[-10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan];
     yf=[-10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan -10000 -10000 -10000 -10000 nan];
@@ -211,7 +212,7 @@ max(heatmap_back_TeamA);
 max(ans)
 
 figure (1)
-imagesc([0 100],[0 70],heatmap_penetrative_TeamA(:,:,end),[0 20])
+imagesc([0 100],[0 70],heatmap_penetrative_TeamA(:,:,end),[0 10])
 hold on
 colormap(jet(100))
 
@@ -246,7 +247,7 @@ set(gca,'YDir','normal')
 text(35,75,'Penetrative passes')
 hold off
 figure(2)
-imagesc([0 100],[0 70],heatmap_support_TeamA(:,:,end),[0 20])
+imagesc([0 100],[0 70],heatmap_support_TeamA(:,:,end),[0 10])
 hold on
 colormap(jet(100))
 
@@ -280,7 +281,7 @@ colorbar
 text(35,75,'Support passes')
 hold off
 figure(3)
-imagesc([0 100],[0 70],heatmap_back_TeamA(:,:,end),[0 20])
+imagesc([0 100],[0 70],heatmap_back_TeamA(:,:,end),[0 10])
 hold on
 colormap(jet(100))
 
