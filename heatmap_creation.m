@@ -53,6 +53,7 @@ for i=2:length(Jgadas1)
             if results4.teamballowner(i)==1
                 if results4.counter(i)~=0
                     for p=1:results4.counter(i)
+                    % In here we save the polygions into different variables x, x2 or x3 corresponding to penetrative passes, support passes and backward passes. 
                         if results4.PR(i,results4.index(p,i))==1
                             if mod(results4.Def(i,1+(2*(p-1))),1)==0 && mod(results4.Def(i,2+(2*(p-1))),1)==0 && abs(results4.Def(i,1+(2*(p-1)),1))<12 && abs(results4.Def(i,2+(2*(p-1))))<12 && results4.Def(i,2+(2*(p-1)))~=0
                                 x(1+(5*(c-1)):1+4+(5*(c-1)))=[results4.x_TeamA(i,results4.ballowner(i)) results4.x_TeamB(i, results4.Def(i,((p-1)*2)+1))  results4.x_TeamA(i,results4.index(p,i)) results4.x_TeamB(i, results4.Def(i,((p-1)*2)+2))  nan];
@@ -115,6 +116,7 @@ for i=2:length(Jgadas1)
                             end
                         end
                     end
+                    %Using the matlab function inpolygon we save the area under the polygon and the amount of points in time they were under this polygons. 
                     heatmap_penetrative_TeamA(:,:,i) = ...
                         heatmap_penetrative_TeamA(:,:,i-1)+inpolygon(X,Y,x,y);
                     
@@ -124,6 +126,7 @@ for i=2:length(Jgadas1)
                     heatmap_back_TeamA(:,:,i) = ...
                         heatmap_back_TeamA(:,:,i-1)+inpolygon(X,Y,x3,y3);
                 end
+                %We do the same for passes to the future position of the player.
                 if results4.counterf(i)~=0
                     c=1;
                     d=1;
@@ -139,7 +142,7 @@ for i=2:length(Jgadas1)
                             
                             if mod(results4.FDef(i,1+(2*(q-1))),1)~=0 && mod(results4.FDef(i,2+(2*(q-1))),1)==0
                                 xf(1+(5*(c-1)):1+4+(5*(c-1)))=[results4.x_TeamA(i,results4.ballowner(i)) results4.FDef(i,1+(2*(q-1))) results4.x_TeamA(i,results4.indexf(q,i)) results4.x_TeamB(i, results4.FDef(i,((q-1)*2)+2))  nan];
-                                yf(1+(5*(c-1)):1+4+(5*(c-1)))=[results4.y_TeamA(i,results4.ballowner(i)) 74.37                           results4.y_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
+                                yf(1+(5*(c-1)):1+4+(5*(c-1)))=[results4.y_TeamA(i,results4.ballowner(i)) 72.10                           results4.y_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
                                 c=c+1;
                             end
                             if mod(results4.FDef(i,2+(2*(q-1))),1)~=0 && mod(results4.FDef(i,1+(2*(q-1))),1)==0
@@ -157,7 +160,7 @@ for i=2:length(Jgadas1)
                             end
                             if mod(results4.FDef(i,1+(2*(q-1))),1)~=0 && mod(results4.FDef(i,2+(2*(q-1))),1)==0
                                 xf2(1+(5*(d-1)):1+(5*(d-1))+4)=[results4.x_TeamA(i,results4.ballowner(i)) results4.FDef(i,1+(2*(q-1)))   results4.x_TeamA(i,results4.indexf(q,i))+results4.vx_TeamA(i,results4.indexf(q,i)) results4.x_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
-                                yf2(1+(5*(d-1)):1+(5*(d-1))+4)=[results4.y_TeamA(i,results4.ballowner(i)) 74.37  results4.y_TeamA(i,results4.indexf(q,i))-results4.vy_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
+                                yf2(1+(5*(d-1)):1+(5*(d-1))+4)=[results4.y_TeamA(i,results4.ballowner(i)) 72.10  results4.y_TeamA(i,results4.indexf(q,i))-results4.vy_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
                                 d=d+1;
                             end
                             if mod(results4.FDef(i,2+(2*(q-1))),1)~=0 && mod(results4.FDef(i,1+(2*(q-1))),1)==0
@@ -174,7 +177,7 @@ for i=2:length(Jgadas1)
                             end
                             if mod(results4.FDef(i,1+(2*(q-1))),1)~=0 && mod(results4.FDef(i,2+(2*(q-1))),1)==0
                                 xf3(1+(5*(e-1)):1+(5*(e-1))+4)=[results4.x_TeamA(i,results4.ballowner(i)) results4.FDef(i,1+(2*(q-1)))   results4.x_TeamA(i,results4.indexf(q,i))+results4.vx_TeamA(i,results4.indexf(q,i)) results4.x_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
-                                yf3(1+(5*(e-1)):1+(5*(e-1))+4)=[results4.y_TeamA(i,results4.ballowner(i)) 74.37  results4.y_TeamA(i,results4.indexf(q,i))-results4.vy_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
+                                yf3(1+(5*(e-1)):1+(5*(e-1))+4)=[results4.y_TeamA(i,results4.ballowner(i)) 72.10  results4.y_TeamA(i,results4.indexf(q,i))-results4.vy_TeamA(i,results4.indexf(q,i)) results4.y_TeamB(i, results4.FDef(i,((q-1)*2)+2)) nan];
                                 e=e+1;
                             end
                             if mod(results4.FDef(i,2+(2*(q-1))),1)~=0 && mod(results4.FDef(i,1+(2*(q-1))),1)==0
@@ -199,7 +202,7 @@ for i=2:length(Jgadas1)
         
     end
 end
-
+%We divide the occurances in between the number of points we had in each second to have a colorscale based in seconds. 
 heatmap_penetrative_TeamA = heatmap_penetrative_TeamA/5;
 heatmap_support_TeamA = heatmap_support_TeamA/5;
 heatmap_back_TeamA = heatmap_back_TeamA/5;
@@ -210,7 +213,9 @@ max(heatmap_support_TeamA);
 max(ans)
 max(heatmap_back_TeamA);
 max(ans)
-
+% We plot the figures using image scale and a colomap jet. The scale is set to be 0 the cooldest color and 10 the hotest color. Also the
+% field is set to have 100*70 meters. Note this is used to scale the different games, we could also have used the exact length of the field (107.71*72.10), or 
+% values to 100. 
 figure (1)
 imagesc([0 100],[0 70],heatmap_penetrative_TeamA(:,:,end),[0 10])
 hold on
