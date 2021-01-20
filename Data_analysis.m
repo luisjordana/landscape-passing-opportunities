@@ -34,6 +34,49 @@ for pp = 1:11
     Foutfield(:,pp) = sum(distanceFBT(:,pp) < distanceOT,2);
 end
 
+%% Calculating defensive coverage area for each player from defending team^M
+% This coverage area is inspired on the work of Grehaigne et al. (1997)
+% https://www.tandfonline.com/doi/pdf/10.1080/026404197367416
+% In essence, this study evaluates a player's ability to change direction
+% based on his running speed. Thus, by considering the angle range and the
+% player's current velocity, a coverage area can be estimated.
+% original velocity and corresponding angle of rotation
+seriesvelocity = [0 1 2 3 4 5 6 7 8];
+seriesangle = [360 280 240 160 100 90 80 60 40];
+
+% a 101-point resolution is considered
+ref_velocity_values = 0:8/100:8;
+ref_angles_values = interp1(series_velocity,series_angle,ref_velocity_values)';
+
+% Calculating angle range for each player in each instant (only for the
+% defending team)
+Team_B.v_angle_plus = nan(size(Team_B.v_angle));
+Team_B.v_angle_minus = nan(size(Team_B.v_angle));
+
+for pp = 1:11
+    % Adapts to the maximum speed of each player during the game under study
+    custom_speed_series = ...
+        [0:max(Team_B.v_total{:,pp})/100:max(Team_B.v_total{:,pp})];
+    
+    % index corresponding to the most similar velocity value from
+    % "ref_velocity_values" array for each timestep for each defender
+    temp = custom_speed_series-Team_B.v_total{:,pp};
+    [~,ix_sim_speed] = min(abs(temp),[],2);
+    
+    Team_B.v_angle_plus(:,pp) = Team_B.v_angle{:,pp} + ...
+        ref_angles_values(ix_sim_speed)/2;
+    Team_B.v_angle_minus(:,pp) = Team_B.v_angle{:,pp} - ...
+        ref_angles_values(ix_sim_speed)/2;
+    Team_B.v_angle_range(:,pp) = ref_angles_values(ix_sim_speed);
+end
+% Convert to table format
+Team_B.v_angle_range = ...
+    array2table(Team_B.v_angle_range,'VariableNames',position_list);
+Team_B.v_angle_plus = ...
+    array2table(Team_B.v_angle_plus,'VariableNames',position_list);
+Team_B.v_angle_minus = ...
+    array2table(Team_B.v_angle_minus,'VariableNames',position_list);
+
 %Now we prebuild the variables PR (the one that will contain what player
 %has the ball, and which can receive each type of pass), PRF (The same for
 %passes that are to the future position of the player), DEF (nearest defender on its
