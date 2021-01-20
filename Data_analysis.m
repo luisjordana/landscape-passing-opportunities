@@ -13,24 +13,6 @@ load('preprocessed_inputs.mat',...
     'Team_A','Team_B','ball',...
     'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
 
-%% Area calcualation
-% Now using the work of Grehaigne, J. F., Bouthier, D., & David (1997). We
-% create 100 points passing by areas with angles relative to the speed of
-% the players. The original work estimated the areas presented in series
-% angle for their corresponding series velocity. The angles are then
-% adapted to the maximum speed of each player during the game
-% under study.
-% seriesangle=[360 280 240 160 100 90 80 60 40];
-% seriesvelocity=[0 1 2 3 4 5 6 7 8];
-% Anglesvalues=interp1(seriesvelocity,seriesangle,0:8/100:8)';
-% Anglesvalues=deg2rad(Anglesvalues);
-% newseries_TeamA(1:101,1:11)=0;
-% newseriesRAY(1:101,1:11)=0;
-% for i=1:11
-%     newseries_TeamB(1:101,i)=0:prctile(vt_TeamB(:,i), 99.95)/100:prctile(vt_TeamB(:,i), 99.95);
-%     newseries_TeamA(1:101,i)=0:prctile(vt_TeamA(:,i), 99.95)/100:prctile(vt_TeamA(:,i), 99.95);
-% end
-
 %% Analysis
 % These indices correspond to 5 Hz data for the plays under study using the
 % 3-min long dataset made available in this repository
