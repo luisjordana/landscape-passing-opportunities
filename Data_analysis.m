@@ -32,8 +32,8 @@ load('preprocessed_inputs.mat',...
 % end
 
 %% Analysis
-%Jgadas1 correspond to the plays made available in this repository,
-%corresponding to the first half
+% These indices correspond to 5 Hz data for the plays under study using the
+% 3-min long dataset made available in this repository
 ix_plays=[1:5:1125 2600:5:3150];
 
 %% distance of each player to Team_B's goal (focus is Team_A offense)
