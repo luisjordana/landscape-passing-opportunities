@@ -40,6 +40,18 @@ ix_plays=[1:5:1125 2600:5:3150];
 [distanceBT,distanceFBT,distanceOT] = ...
     distance_opposing_goal(ix_plays,Team_A,Team_B);
 
+%% For each attacking player how many opposing players are outfielded (?)
+% Again, looks from an offensive perspective to Team_A 
+outfield = nan(length(ix_plays),11);
+Foutfield = nan(length(ix_plays),11);
+
+% Using the distance to the goal line, we calculate the number of players 
+% outfielded by each player from Team_A. runs for the 11 players
+for pp = 1:11
+    outfield(:,pp) = sum(distanceBT(:,pp) < distanceOT,2);
+    Foutfield(:,pp) = sum(distanceFBT(:,pp) < distanceOT,2);
+end
+
 %Now we prebuild the variables PR (the one that will contain what player
 %has the ball, and which can receive each type of pass), PRF (The same for
 %passes that are to the future position of the player), DEF (nearest defender on its
