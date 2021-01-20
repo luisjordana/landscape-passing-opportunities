@@ -77,6 +77,17 @@ Team_B.v_angle_plus = ...
 Team_B.v_angle_minus = ...
     array2table(Team_B.v_angle_minus,'VariableNames',position_list);
 
+%% relevant ballowner variables
+% These values will be used later on
+ball_carrier_x = nan(size(Team_A.x,1),1);
+ball_carrier_outfield = nan(size(Team_A.x,1),1);
+for pp = 1:11
+    ix = ball.possession_player_id2 == pp & ...
+        ~isnan(outfield(:,pp));
+    ball_carrier_x(ix) = Team_A.x{ix,pp};
+    ball_carrier_outfield(ix) = outfield(ix,pp);
+end
+
 %Now we prebuild the variables PR (the one that will contain what player
 %has the ball, and which can receive each type of pass), PRF (The same for
 %passes that are to the future position of the player), DEF (nearest defender on its
