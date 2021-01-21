@@ -81,9 +81,11 @@ Team_B.v_angle_plus = nan(size(Team_B.v_angle));
 Team_B.v_angle_minus = nan(size(Team_B.v_angle));
 
 for pp = 1:11
-    % Adapts to the maximum speed of each player during the game under study
-    custom_speed_series = ...
-        [0:max(Team_B.v_total(:,pp))/100:max(Team_B.v_total(:,pp))];
+    % Adapts to the 99.5 percentile speed of each player during the game 
+    % under study
+    step_ = v_total_prct99_95(pp)/100;
+    
+    custom_speed_series = [0:step:v_total_prct99_95(pp)];
     
     % index corresponding to the most similar velocity value from
     % "ref_velocity_values" array for each timestep for each defender

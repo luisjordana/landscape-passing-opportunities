@@ -149,6 +149,8 @@ Team_A.v_y = array2table([diff(Team_A.y{:,:}); nan(1,11)]/dt,...
     'VariableNames',position_list);
 Team_A.v_total = array2table(sqrt(Team_A.v_x{:,:}.^2 + Team_A.v_y{:,:}.^2),...
     'VariableNames',position_list);
+Team_A.v_max = array2table(max(Team_A.v_total{:,:}),...
+    'VariableNames',position_list);
 Team_A.v_angle = array2table(atan2d(Team_A.v_x{:,:},Team_A.v_y{:,:}),...
     'VariableNames',position_list);
 
@@ -157,6 +159,8 @@ Team_B.v_x = array2table([diff(Team_B.x{:,:}); nan(1,11)]/dt,...
 Team_B.v_y = array2table([diff(Team_B.y{:,:}); nan(1,11)]/dt,...
     'VariableNames',position_list);
 Team_B.v_total = array2table(sqrt(Team_B.v_x{:,:}.^2 + Team_B.v_y{:,:}.^2),...
+    'VariableNames',position_list);
+Team_B.v_max = array2table(max(Team_B.v_total{:,:}),...
     'VariableNames',position_list);
 Team_B.v_angle = array2table(atan2d(Team_B.v_x{:,:},Team_B.v_y{:,:}),...
     'VariableNames',position_list);
@@ -258,8 +262,8 @@ Team_B.a_total = array2table(sqrt(Team_B.a_x{:,:}.^2 + Team_B.a_y{:,:}.^2),...
     'VariableNames',position_list);
 
 % high velocity percentiles (used later on)
-vt_TeamA_prct99_95 = prctile(Team_A.v_total{:,:}, 99.95);
-vt_TeamB_prct99_95 = prctile(Team_B.v_total{:,:}, 99.95);
+Team_A.v_total_prct99_95 = prctile(Team_A.v_total{:,:}, 99.95);
+Team_A.v_total_prct99_95 = prctile(Team_B.v_total{:,:}, 99.95);
 
 %%
 % Now we intend to create two variables, one that tell us who is the team
@@ -366,10 +370,11 @@ ball = ball(ix_plays,:);
 % runs every field of "Team" structures
 fields = fieldnames(Team_A);
 for ff = 1:length(fields)
-    Team_A.(fields{ff}) = Team_A.(fields{ff})(ix_plays,:);
-    Team_B.(fields{ff}) = Team_B.(fields{ff})(ix_plays,:);
+    if size(Team_A.(fields{ff}),1)>1
+        Team_A.(fields{ff}) = Team_A.(fields{ff})(ix_plays,:);
+        Team_B.(fields{ff}) = Team_B.(fields{ff})(ix_plays,:);
+    end
 end
 
 save('preprocessed_inputs.mat',...
-    'Team_A','Team_B','ball',...
-    'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
+    'Team_A','Team_B','ball')
