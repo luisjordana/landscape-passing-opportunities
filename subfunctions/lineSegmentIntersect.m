@@ -98,14 +98,26 @@ out.intNormalizedDistance2To1 = u_b;
 out.parAdjacencyMatrix = PAR_B;
 out.coincAdjacencyMatrix= COINC_B;
 
-for i=1:length(XY1(:,1))
-   if INT_B(i)==1
-      a=sqrt((XY1(i,1)-out.intMatrixX(i)).^2+(XY1(i,2)-out.intMatrixY(i)).^2);
-      b=sqrt((XY1(i,1)-Xpuntosintermedios(i)).^2+(XY1(i,2)-yPuntosintermedios(i)).^2);
-      td=a/b;
-      a=sqrt((XY2(1)-out.intMatrixX(i)).^2+(XY2(2)-out.intMatrixY(i)).^2);
-      ta=a/10;
-      if td>ta
+for i=1:length(XY1(:,1)) % For the amount of segments we are studying (200 in our case)
+   if INT_B(i)==1 %If the line cross the pass. 
+      distance_to_interception=sqrt((XY1(i,1)-out.intMatrixX(i)).^2+(XY1(i,2)-out.intMatrixY(i)).^2); 
+      %module of the vector from the position of the defender to the point where the line intersects with the
+      % segment.
+      distance_to_end_of_area=sqrt((XY1(i,1)-Xpuntosintermedios(i)).^2+(XY1(i,2)-yPuntosintermedios(i)).^2);
+      %module of the vector from the position of the defender to the point where 
+      %the area ends.
+      time_of_interception=distance_to_interception/distance_to_end_of_area;
+      % By dividing this modules we have the seconds the defender takes to
+      % the interception.
+      ballcarrier_to_interception=sqrt((XY2(1)-out.intMatrixX(i)).^2+(XY2(2)-out.intMatrixY(i)).^2);
+      %module of the vector from the position of the ballcarrier to the point where 
+      %the area ends.
+      time_of_ball=ballcarrier_to_interception/10;
+      % By dividing by 10 m/s we get the time the ball takes to arrive to
+      % the interception.
+      if time_of_interception>time_of_ball
+          %if the player takes longer than the ball this value is set to 0,
+          %if not is left in 1 meaning the ball was intercepted. 
           INT_B(i)=0;
       end
    end
