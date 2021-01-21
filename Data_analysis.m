@@ -185,52 +185,152 @@ for pp = 1:11
     inf_velocity = 9999999;
     def_coverage_x{pp} = Team_B.x{:,pp} + ...
         inf_velocity * sind(angle_points{pp});
-    def_coverage_x{pp} = Team_B.y{:,pp} + ...
+    def_coverage_y{pp} = Team_B.y{:,pp} + ...
         inf_velocity * cosd(angle_points{pp});
 end
 
-
-%Now we prebuild the variables PR (the one that will contain what player
-%has the ball, and which can receive each type of pass), PRF (The same for
-%passes that are to the future position of the player), DEF (nearest defender on its
-%defect the mid position in the sideline between the receiver and the
-%passer), FDEF (same for passes to future position), outfield and Foutfield
-%give the number of outfield of each player for its current position and
-%future position. This doesn't play any role on the build up of the heatmap
-%or video but helps with seen if the algorithm is working adequately.
-PR(1:length(ix_plays),1:11)=0;
-PRF(1:length(ix_plays),1:11)=0;
-Def(1:length(ix_plays),1:20)=0;
-FDef(1:length(ix_plays),1:20)=0;
-outfield(1:length(ix_plays),1:11)=0;
-Foutfield(1:length(ix_plays),1:11)=0;
-% To see the information on how the algorithm is working please refer to
-% the algorithm function.
-for i=1:length(ix_plays)
-    if ballowner(i)~=0
-        [PR(i,:), PRF(i,:), Def(i,:), FDef(i,:), outfield(i,:), Foutfield(i,:)] = ...
-            passing_linesD(x_TeamA(i,:), y_TeamA(i,:), x_TeamB(i,:), ...
-            y_TeamB(i,:),vx_TeamA(i,:),vy_TeamA(i,:),vx_TeamB(i,:),...
-            vy_TeamB(i,:), newseries_TeamB, teamballowner(i), ballowner(i),...
-            [0 0 0],1,distanceBT(i,:),distanceFBT(i,:),distanceOT(i,:));
+% for indexing (later used)
+h = 1; 
+for t = 1:length(ix_plays)
+    t
+   % skips if Team_A is not the ball owner or there is no ball owner at all
+   ball_owner = ball.possession_player_id2(t);
+    if ball.possession_team_id(t) ~=1 || isnan(ball_owner)
+        continue
+    end
+    
+    % position of ball owner
+    ball_owner_pos = ...
+        [Team_A.x{t,ball_owner} Team_A.y{t,ball_owner}];
+    
+    % runs every potential pass-receiving player from Team_A
+    for pp1 = 1:11        
+        % skips player if he is the ball_owner (PR=2)
+        if PR(t,pp1) == 2
+            continue
+        end
+                      
+        % runs present (1) and future (next second, 2) possibilities, by
+        % considering either present or future positioning
+        for time = [1 2] 
+            % runs every opposing player, assessing their defensive coverage
+            for pp2 = 1:11
+                % Line segments extending from each defensive player
+                def_lines(:,1:4) = ...
+                    [repmat([Team_B.x{t,pp2} Team_B.y{t,pp2}],200,1) ...
+                    def_coverage_x{pp2}(t,:)' def_coverage_y{pp2}(t,:)'];
+                
+                % the variables below only need to be calculated once per
+                % player in attacking team (pp1)
+                if pp2 == 1
+                    % position of receiving player
+                    receiver_pos = [Team_A.x{t,pp1} Team_A.y{t,pp1}];
+                    % correspoding passing line segment
+                    passing_line = [ball_owner_pos receiver_pos];
+                
+                    % if future positioning is being considered
+                    if time == 2
+                        receiver_pos = receiver_pos + ...
+                            [Team_A.v_x{t,pp1} Team_A.v_y{t,pp1}];
+                    end
+                end
+                
+                % current and future defending player position
+                defender_pos = [Team_B.x{t,pp2} Team_B.y{t,pp2}];
+                defender_Fpos = [Team_B.x{t,pp2} + Team_B.v_x{t,pp2}...
+                    Team_B.y{t,pp2} + Team_B.v_y{t,pp2}];
+            
+                % The defensive line segments are used for each opposing 
+                % player to calculate if that player can arrive to a passing
+                % line before the ball reaches a potential receiving player 
+                intercept_bool = lineSegmentIntersect(def_lines,passing_line,...
+                    Team_B.v_total{t,pp2});
+                
+                % distance between the defender and the passing line
+                % ins indicats if the passing line is intercepted
+                % depending on counter "time", receiver_pos corresponds to
+                % current or future positioning
+                [distance(pp2), ins(pp2)] = distance_passline(...
+                    ball_owner_pos, receiver_pos, defender_pos);
+                
+                % same as distance, but consideres defender future
+                % positioning
+                [distanceF(pp2), insF(pp2)] = distance_passline(...
+                    ball_owner_pos, receiver_pos, defender_Fpos);
+                                
+                % if the passing line is intercepted, PR = 0
+                if time == 1 && (intercept_bool == 1 ||  ...
+                        abs(distance(pp2))<1 || abs(distanceF(pp2))<1)
+                    PR(t,pp1) = 0;
+                    continue
+                elseif time == 2 && (intercept_bool == 1 || ...
+                        abs(distance(pp2))<1 || abs(distanceF(pp2))<1)
+                    PRF(t,pp1) = 0;
+                    continue
+                end
+            end
+                
+            % if the pass can't be intercepted, the defensive players that
+            % are nearer in each side are identified. In the absence of a
+            % defender on a given (or both) side(s), the nearest point in
+            % the sideline is considered.
+            index = 1:11;
+            
+            % ???
+            ix = ins == 0;
+            index(ix) = [];
+            distance(ix) = [];
+            ins(ix) = [];
+            
+            right = find(distance(:)<0);
+            left = find(distance(:)>0);
+            
+            % ????
+            if isempty(right)
+                distanceright(:,1) = ...
+                    (Team_A.x{t,ball_owner} + Team_A.x{t,pp1})/2;
+                distanceright(:,2) = 0;
+            else
+                distanceright(:,1) = index(distance(:)<0); % ????
+                distanceright(:,2) = distance(distance(:)<0);
+            end
+            
+            % ????
+            if isempty(left)
+                distanceleft(:,1) = (Team_A.x{t,ball_owner} + Team_A.x{t,pp1})/2;
+                distanceleft(:,2) = 0;
+            else
+                distanceleft(:,2)=distance(distance(:)>0);
+                distanceleft(:,1)=index(distance(:)>0);
+            end
+            
+            % sorts distances from closest to farthest
+            distanceleft = sortrows(distanceleft,2);
+            distanceright = sortrows(distanceright,2,'descend');
+          
+            if time == 1
+                % ????
+                Def(t,h) = distanceright(1,1);
+                Def(t,h+1) = distanceleft(1,1);
+            else
+            % ????
+                FDef(t,h) = distanceright(1,1);
+                FDef(t,h+1) = distanceleft(1,1);
+            end
+            % ????
+            h=h+2;
+            
+            % ????
+            outfieldplayers(t) = outfield(t)-outfield(ball_owner);
+            
+            % reset
+            distanceright=[]; distanceleft=[];
+            index=1:11;
+            ins(1:11)=0;
+            distance(1:11)=0;
+        end
     end
 end
-
-
-% As the heatmap takes a lot of time to be build i usually do one half at a
-% time by simply changing the part were the algorithm is run.
-
-% PR(1:length(Jgadas2),1:11)=0;
-% PRF(1:length(Jgadas2),1:11)=0;
-% Def(1:length(Jgadas2),1:20)=0;
-% FDef(1:length(Jgadas2),1:20)=0;
-% outfield(1:length(Jgadas2),1:11)=0;
-% Foutfield(1:length(ix_plays),1:11)=0;
-% for i=1:length(Jgadas2)
-%     if ballowner(Jgadas2(i))~=0
-%     [PR(i,:), PRF(i,:), Def(i,:), FDef(i,:),outfield(i,:), Foutfield(i,:)]=passing_linesD(x_TeamA(Jgadas2(i),:), y_TeamA(Jgadas2(i),:), x_TeamB(Jgadas2(i),:), y_TeamB(Jgadas2(i),:),vx_TeamA(Jgadas2(i),:),vy_TeamA(Jgadas2(i),:),vx_TeamB(Jgadas2(i),:),vy_TeamB(Jgadas2(i),:), newseries_TeamB, teamballowner(Jgadas2(i)), ballowner(Jgadas2(i)),[0 0 0],2);
-%     end
-% end
 
 %These counters and index are created to buildn the
 counter(1:length(PR))=0;
@@ -254,28 +354,28 @@ end
 
 % store outputs
 results4.ix_plays = ix_plays;
-results4.PR=PR;
-results4.PRF=PRF;
-results4.Def=Def;
-results4.FDef=FDef;
-results4.counter=counter;
-results4.counterf=counterf;
-results4.index=index;
-results4.indexf=indexf;
-results4.x_TeamA=x_TeamA;
-results4.y_TeamA=y_TeamA;
-results4.x_TeamB=x_TeamB;
-results4.y_TeamB=y_TeamB;
-results4.vx_TeamA=vx_TeamA;
-results4.vy_TeamA=vy_TeamA;
-results4.vx_TeamB=vx_TeamB;
-results4.vy_TeamB=vy_TeamB;
-results4.ballowner=ballowner;
-results4.teamballowner=teamballowner;
-results4.xball=xball;
-results4.yball=yball;
-results4.outfield=outfield;
-results4.Foutfield=Foutfield;
+results4.PR = PR;
+results4.PRF = PRF;
+results4.Def = Def;
+results4.FDef = FDef;
+results4.counter = counter;
+results4.counterf = counterf;
+results4.index = index;
+results4.indexf = indexf;
+results4.x_TeamA = Team_A.x;
+results4.y_TeamA = Team_A.y;
+results4.x_TeamB = Team_B.x;
+results4.y_TeamB = Team_B.y;
+results4.vx_TeamA = Team_A.v_x;
+results4.vy_TeamA = Team_A.v_y;
+results4.vx_TeamB = Team_B.v_x;
+results4.vy_TeamB = Team_B.v_y;
+results4.ballowner = ball.possession_player_id2;
+results4.teamballowner = ball.possession_team_id;
+results4.xball = ball.x;
+results4.yball = ball.y;
+results4.outfield = outfield;
+results4.Foutfield = Foutfield;
 
 %% save and load
 save('final_results.mat', 'results4')
