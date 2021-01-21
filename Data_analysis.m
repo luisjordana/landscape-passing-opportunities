@@ -13,6 +13,9 @@ load('preprocessed_inputs.mat',...
     'Team_A','Team_B','ball',...
     'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
 
+% pitch positions
+position_list = {'GK','LB','CB1','CB2','RB','LW','CM','MF1','MF2','RW','ST'};
+
 % number of data rows (or timesteps considered in this code)
 num_data_rows = size(Team_A.x,1);
 
@@ -44,8 +47,8 @@ end
 % based on his running speed. Thus, by considering the angle range and the
 % player's current velocity, a coverage area can be estimated.
 % original velocity and corresponding angle of rotation
-seriesvelocity = [0 1 2 3 4 5 6 7 8];
-seriesangle = [360 280 240 160 100 90 80 60 40];
+series_velocity = [0 1 2 3 4 5 6 7 8];
+series_angle = [360 280 240 160 100 90 80 60 40];
 
 % a 101-point resolution is considered
 ref_velocity_values = 0:8/100:8;
@@ -156,6 +159,34 @@ for pp = 1:11
         Team_A.v_total{:,pp} > 2;
     PRF(ix,pp) = 4;
 end
+
+% calculates coverage range for every player from the defending team
+angle_points = cell(1,11);
+def_coverage_x = cell(1,11);
+def_coverage_y = cell(1,11);
+
+for pp = 1:11
+    % To vectorize this calculation, the problem is formulated as 
+    % angle_coverage = starting_angle + coef*angle_range_series, with this
+    % range_series being a discretized 200 points-long array from 0 to 
+    % angle_range (using linspace, replicated for each data row, and diag
+    % to be able to multiply a vector (angle_range) with the linspace matrix.
+    % Source: https://stackoverflow.com/questions/40120585/matlab-multiply-each-row-in-matrix-by-different-number
+    angle_points{pp} = Team_B.v_angle_minus{:,1} + ...
+        diag(Team_B.v_angle_range{:,pp})*repmat(linspace(0,1,200),num_data_rows,1);
+    
+    % defensive coverage considers an exaggerated velocity so that the line
+    % segments reach the pitch boundaries (it is okay if the field limits
+    % are surpasssed). This will be used to detect possible interceptions
+    % with a given passing line. Later on, the time needed by the defender 
+    % for that interception will be calculated.
+    inf_velocity = 9999999;
+    def_coverage_x{pp} = Team_B.x{:,pp} + ...
+        inf_velocity * sind(angle_points{pp});
+    def_coverage_x{pp} = Team_B.y{:,pp} + ...
+        inf_velocity * cosd(angle_points{pp});
+end
+
 
 %Now we prebuild the variables PR (the one that will contain what player
 %has the ball, and which can receive each type of pass), PRF (The same for
