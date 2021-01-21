@@ -57,12 +57,12 @@ X2 = repmat(XY1(:,3),1,n_rows_2);
 Y1 = repmat(XY1(:,2),1,n_rows_2);
 Y2 = repmat(XY1(:,4),1,n_rows_2);
 
-XY2 = XY2';
+XY2_t = XY2';
 
-X3 = repmat(XY2(1,:),n_rows_1,1);
-X4 = repmat(XY2(3,:),n_rows_1,1);
-Y3 = repmat(XY2(2,:),n_rows_1,1);
-Y4 = repmat(XY2(4,:),n_rows_1,1);
+X3 = repmat(XY2_t(1,:),n_rows_1,1);
+X4 = repmat(XY2_t(3,:),n_rows_1,1);
+Y3 = repmat(XY2_t(2,:),n_rows_1,1);
+Y4 = repmat(XY2_t(4,:),n_rows_1,1);
 
 X4_X3 = (X4-X3);
 Y1_Y3 = (Y1-Y3);
@@ -98,13 +98,19 @@ defender_y = XY1(1,2);
 ball_x = XY2(1,1);
 ball_y = XY2(1,2);
 
+% if no extended defensive line intercepts the passing line
+if sum(intercept_bool) == 0
+    intercept_bool = 0;
+    return
+end
+
 % the defensive coverage segments which cross the passing line 
 ix_intercept = intercept_bool == 1;
 
 % distance between a given defender and the defensive coverage-passing line
 % interception 
-dist_def_to_interception = sqrt((defender_x - intercept_x).^2 + ...
-    (defender_y - intercept_y).^2);
+dist_def_to_interception = sqrt((defender_x - intercept_x(ix_intercept)).^2 + ...
+    (defender_y - intercept_y(ix_intercept)).^2);
 
 % time for a given defender to intercept a passing line
 time_def_to_interception = dist_def_to_interception / def_velocity;
