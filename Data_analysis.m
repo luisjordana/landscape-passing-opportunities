@@ -30,9 +30,10 @@ Anglesvalues=interp1(seriesvelocity,seriesangle,0:8/100:8)';
 Anglesvalues=deg2rad(Anglesvalues);
 newseries_TeamA(1:101,1:11)=0;
 newseriesRAY(1:101,1:11)=0;
+
 for i=1:11
-    newseries_TeamB(1:101,i)=0:prctile(vt_TeamB(:,i), 99.95)/100:prctile(vt_TeamB(:,i), 99.95);
-    newseries_TeamA(1:101,i)=0:prctile(vt_TeamA(:,i), 99.95)/100:prctile(vt_TeamA(:,i), 99.95);
+    newseries_TeamB(1:101,i)=0:vt_TeamB_prct99_95/100:vt_TeamB_prct99_95;
+    newseries_TeamA(1:101,i)=0:vt_TeamA_prct99_95/100:vt_TeamA_prct99_95;
 end
 
 %% Analysis
