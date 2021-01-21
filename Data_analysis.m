@@ -13,6 +13,9 @@ load('preprocessed_inputs.mat',...
     'Team_A','Team_B','ball',...
     'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
 
+% number of data rows (or timesteps considered in this code)
+num_data_rows = size(Team_A.x,1);
+
 %% Analysis
 % These indices correspond to 5 Hz data for the plays under study using the
 % 3-min long dataset made available in this repository
@@ -24,8 +27,8 @@ ix_plays=[1:5:1125 2600:5:3150];
 
 %% For each attacking player how many opposing players are outfielded (?)
 % Again, looks from an offensive perspective to Team_A 
-outfield = nan(length(ix_plays),11);
-Foutfield = nan(length(ix_plays),11);
+outfield = nan(num_data_rows,11);
+Foutfield = nan(num_data_rows,11);
 
 % Using the distance to the goal line, we calculate the number of players 
 % outfielded by each player from Team_A. runs for the 11 players
@@ -79,8 +82,8 @@ Team_B.v_angle_minus = ...
 
 %% relevant ballowner variables
 % These values will be used later on
-ball_carrier_x = nan(size(Team_A.x,1),1);
-ball_carrier_outfield = nan(size(Team_A.x,1),1);
+ball_carrier_x = nan(num_data_rows,1);
+ball_carrier_outfield = nan(num_data_rows,1);
 for pp = 1:11
     ix = ball.possession_player_id2 == pp & ...
         ~isnan(outfield(:,pp));
