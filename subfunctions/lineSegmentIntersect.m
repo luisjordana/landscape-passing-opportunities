@@ -1,4 +1,11 @@
-function out = lineSegmentIntersect(XY1,XY2, Xpuntosintermedios,yPuntosintermedios)
+% Source: https://www.mathworks.com/matlabcentral/fileexchange/27205-fast-line-segment-intersection
+% This code was adapted to evaluate how long a defender and the ball take
+% to reach a potential interception point, and cancel interceptions where
+% the defender takes longer than the ball to reach that point
+% XYI and XY2 naming was defined in the original script, and in this
+% project correspond to the coverage lines from a defender and the passing
+% line between the ball carrier and a potential receiver, respectively
+function out = lineSegmentIntersect(XY1,XY2,def_velocity)
 %LINESEGMENTINTERSECT Intersections of line segments.
 %   OUT = LINESEGMENTINTERSECT(XY1,XY2) finds the 2D Cartesian Coordinates of
 %   intersection points between the set of line segments given in XY1 and XY2.
@@ -7,7 +14,6 @@ function out = lineSegmentIntersect(XY1,XY2, Xpuntosintermedios,yPuntosintermedi
 %   Each row is of the form [x1 y1 x2 y2] where (x1,y1) is the start point and 
 %   (x2,y2) is the end point of a line segment.
 
-%
 %   OUT is a structure with fields:
 %
 %   'intAdjacencyMatrix' : N1xN2 indicator matrix where the entry (i,j) is 1 if
@@ -31,14 +37,7 @@ function out = lineSegmentIntersect(XY1,XY2, Xpuntosintermedios,yPuntosintermedi
 %       line segments XY1(i,:) and XY2(j,:) are parallel.
 %
 %   'coincAdjacencyMatrix' : N1xN2 indicator matrix where the (i,j) entry is 1 
-%       if line segments XY1(i,:) and XY2(j,:) are coincident.
-%
-%   I modifiend this function to also include the mid points. This mid
-%   points are then used (in case the area segments intersect with the passing line)
-%   in the end part of the function to calculate if the players will arrive
-%   to that point of the passing line before the ball or not. Also the ball
-%   velocity is introduced here. 
-%   
+%       if line segments XY1(i,:) and XY2(j,:) are coincident.   
 %-------------------------------------------------------------------------------
 
 validateattributes(XY1,{'numeric'},{'2d','finite'});
@@ -86,10 +85,38 @@ INT_B = (u_a >= 0) & (u_a <= 1) & (u_b >= 0) & (u_b <= 1);
 PAR_B = denominator == 0;
 COINC_B = (numerator_a == 0 & numerator_b == 0 & PAR_B);
 
-%%distance a punto determinado
+% the defensive coverage segments which cross the passing line 
+ix_intercept = INT_B == 1;
 
+% distance between a given defender and the defensive coverage-passing line
+% interception 
+dist_def_to_interception = sqrt(...
+    (XY1(ix_intercept,1) - out.intMatrixX).^2 + ...
+    (XY1(ix_intercept,2) - out.intMatrixY(ix_intercept)).^2);
 
-% Arrange output.
+% time for a given defender to intercept a passing line
+time_def_to_interception = dist_def_to_interception / def_velocity;
+
+% distance between the ballowner (the starting point of the pass) and the
+% possible pass interception by a given defender
+dist_ball_to_interception = sqrt(...
+    (XY2(ix_intercept,1) - out.intMatrixX(ix_intercept)).^2 + ...
+    (XY2(ix_intercept,2)-out.intMatrixY(ix_intercept)).^2);
+
+% assumed ball speed
+ball_speed = 10;
+
+% time for the bal to reach the possible defender interception
+time_ball_to_interception = dist_ball_to_interception / ball_speed;
+
+% no-interception: if the defender takes longer than the ball to reach a 
+% potential interception point
+ix_no_intercept = time_def_to_interception > time_ball_to_interception;
+% corrects this index, since previously infinitely long defensive line
+% segments were considered
+INT_B(ix_intercept(ix_no_intercept)) = 0;
+
+% Arrange output
 out.intAdjacencyMatrix = INT_B;
 out.intMatrixX = INT_X .* INT_B;
 out.intMatrixY = INT_Y .* INT_B;
@@ -98,33 +125,4 @@ out.intNormalizedDistance2To1 = u_b;
 out.parAdjacencyMatrix = PAR_B;
 out.coincAdjacencyMatrix= COINC_B;
 
-for i=1:length(XY1(:,1)) % For the amount of segments we are studying (200 in our case)
-   if INT_B(i)==1 %If the line cross the pass. 
-      distance_to_interception=sqrt((XY1(i,1)-out.intMatrixX(i)).^2+(XY1(i,2)-out.intMatrixY(i)).^2); 
-      %module of the vector from the position of the defender to the point where the line intersects with the
-      % segment.
-      distance_to_end_of_area=sqrt((XY1(i,1)-Xpuntosintermedios(i)).^2+(XY1(i,2)-yPuntosintermedios(i)).^2);
-      %module of the vector from the position of the defender to the point where 
-      %the area ends.
-      time_of_interception=distance_to_interception/distance_to_end_of_area;
-      % By dividing this modules we have the seconds the defender takes to
-      % the interception.
-      ballcarrier_to_interception=sqrt((XY2(1)-out.intMatrixX(i)).^2+(XY2(2)-out.intMatrixY(i)).^2);
-      %module of the vector from the position of the ballcarrier to the point where 
-      %the area ends.
-      time_of_ball=ballcarrier_to_interception/10;
-      % By dividing by 10 m/s we get the time the ball takes to arrive to
-      % the interception.
-      if time_of_interception>time_of_ball
-          %if the player takes longer than the ball this value is set to 0,
-          %if not is left in 1 meaning the ball was intercepted. 
-          INT_B(i)=0;
-      end
-   end
-   
 end
-out.intAdjacencyMatrix = INT_B;
-
-
-end
-
