@@ -21,20 +21,20 @@ for pp = 1:11
     % % % % % % % % % % % % % % % % % % % %
     % player-left post vector
     % 3D (with z=0) to allow for cross-product implementation
-    LP = [Team_A.x{:,pp} Team_A.y{:,pp} zeros(length(ix_plays),1)];
+    LP = [Team_A.x(:,pp) Team_A.y(:,pp) zeros(length(ix_plays),1)];
     distanceBT(:,pp) = ...
         vecnorm(cross(repmat(LR,length(ix_plays),1),LP,2),2,2)/norm(LR);
     
     % distance for players from ball-owning team (future positioning)
     % % % % % % % % % % % % % % % % % % % %
-    LP = [Team_A.x{:,pp} + Team_A.v_x{:,pp} ...
-        Team_A.y{:,pp} + Team_A.v_y{:,pp} zeros(length(ix_plays),1)];
+    LP = [Team_A.x(:,pp) + Team_A.v_x(:,pp) ...
+        Team_A.y(:,pp) + Team_A.v_y(:,pp) zeros(length(ix_plays),1)];
     distanceFBT(:,pp) = ...
         vecnorm(cross(repmat(LR,length(ix_plays),1),LP,2),2,2)/norm(LR);
     
     % distance for players from defending teamam
     % % % % % % % % % % % % % % % % % % % %
-    LP = [Team_B.x{:,pp} Team_B.y{:,pp} zeros(length(ix_plays),1)];
+    LP = [Team_B.x(:,pp) Team_B.y(:,pp) zeros(length(ix_plays),1)];
     distanceOT(:,pp) = ...
         vecnorm(cross(repmat(LR,length(ix_plays),1),LP,2),2,2)/norm(LR);
 end

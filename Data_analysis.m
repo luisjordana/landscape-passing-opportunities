@@ -13,7 +13,28 @@ load('preprocessed_inputs.mat',...
     'Team_A','Team_B','ball',...
     'vt_TeamA_prct99_95','vt_TeamB_prct99_95')
 
-% pitch positions
+% converts variables from table to array format
+Team_A.x = table2array(Team_A.x);
+Team_A.y = table2array(Team_A.y);
+Team_A.v_x = table2array(Team_A.v_x);
+Team_A.v_y = table2array(Team_A.v_y);
+Team_A.v_total = table2array(Team_A.v_total);
+Team_A.v_angle = table2array(Team_A.v_angle);
+Team_A.a_x = table2array(Team_A.a_x);
+Team_A.a_y = table2array(Team_A.a_y);
+Team_A.a_total = table2array(Team_A.a_total);
+
+Team_B.x = table2array(Team_B.x);
+Team_B.y = table2array(Team_B.y);
+Team_B.v_x = table2array(Team_B.v_x);
+Team_B.v_y = table2array(Team_B.v_y);
+Team_B.v_total = table2array(Team_B.v_total);
+Team_B.v_angle = table2array(Team_B.v_angle);
+Team_B.a_x = table2array(Team_B.a_x);
+Team_B.a_y = table2array(Team_B.a_y);
+Team_B.a_total = table2array(Team_B.a_total);
+
+% pitch positions, correspoding to the columns of the variables here used
 position_list = {'GK','LB','CB1','CB2','RB','LW','CM','MF1','MF2','RW','ST'};
 
 % number of data rows (or timesteps considered in this code)
@@ -62,26 +83,19 @@ Team_B.v_angle_minus = nan(size(Team_B.v_angle));
 for pp = 1:11
     % Adapts to the maximum speed of each player during the game under study
     custom_speed_series = ...
-        [0:max(Team_B.v_total{:,pp})/100:max(Team_B.v_total{:,pp})];
+        [0:max(Team_B.v_total(:,pp))/100:max(Team_B.v_total(:,pp))];
     
     % index corresponding to the most similar velocity value from
     % "ref_velocity_values" array for each timestep for each defender
-    temp = custom_speed_series-Team_B.v_total{:,pp};
+    temp = custom_speed_series-Team_B.v_total(:,pp);
     [~,ix_sim_speed] = min(abs(temp),[],2);
     
-    Team_B.v_angle_plus(:,pp) = Team_B.v_angle{:,pp} + ...
+    Team_B.v_angle_plus(:,pp) = Team_B.v_angle(:,pp) + ...
         ref_angles_values(ix_sim_speed)/2;
-    Team_B.v_angle_minus(:,pp) = Team_B.v_angle{:,pp} - ...
+    Team_B.v_angle_minus(:,pp) = Team_B.v_angle(:,pp) - ...
         ref_angles_values(ix_sim_speed)/2;
     Team_B.v_angle_range(:,pp) = ref_angles_values(ix_sim_speed);
 end
-% Convert to table format
-Team_B.v_angle_range = ...
-    array2table(Team_B.v_angle_range,'VariableNames',position_list);
-Team_B.v_angle_plus = ...
-    array2table(Team_B.v_angle_plus,'VariableNames',position_list);
-Team_B.v_angle_minus = ...
-    array2table(Team_B.v_angle_minus,'VariableNames',position_list);
 
 %% relevant ballowner variables
 % These values will be used later on
@@ -90,7 +104,7 @@ ball_carrier_outfield = nan(num_data_rows,1);
 for pp = 1:11
     ix = ball.possession_player_id2 == pp & ...
         ~isnan(outfield(:,pp));
-    ball_carrier_x(ix) = Team_A.x{ix,pp};
+    ball_carrier_x(ix) = Team_A.x(ix,pp);
     ball_carrier_outfield(ix) = outfield(ix,pp);
 end
 
@@ -121,7 +135,7 @@ for pp = 1:11
         ~isnan(ball.possession_player_id2) & ...
         ball.possession_player_id2 ~= pp & ...
         Foutfield(:,pp)>ball_carrier_outfield & ...
-        Team_A.v_total{:,pp} > 2;
+        Team_A.v_total(:,pp) > 2;
     PRF(ix,pp) = 1;
     
     % PR = 3, support passes 
@@ -139,7 +153,7 @@ for pp = 1:11
         ball.possession_player_id2 ~= pp & ...
         Foutfield(:,pp) == ball_carrier_outfield & ...
         (pp > 1 | ball_carrier_x > 57.4150) & ...
-        Team_A.v_total{:,pp} > 2;
+        Team_A.v_total(:,pp) > 2;
     PRF(ix,pp) = 3;
     
     % PR = 4, retreat passes 
@@ -156,7 +170,7 @@ for pp = 1:11
         ball.possession_player_id2 ~= pp & ...
         Foutfield(:,pp) < ball_carrier_outfield & ...
         (pp > 1 | ball_carrier_x > 57.4150) & ...
-        Team_A.v_total{:,pp} > 2;
+        Team_A.v_total(:,pp) > 2;
     PRF(ix,pp) = 4;
 end
 
@@ -172,8 +186,8 @@ for pp = 1:11
     % angle_range (using linspace, replicated for each data row, and diag
     % to be able to multiply a vector (angle_range) with the linspace matrix.
     % Source: https://stackoverflow.com/questions/40120585/matlab-multiply-each-row-in-matrix-by-different-number
-    angle_points{pp} = Team_B.v_angle_minus{:,1} + ...
-        diag(Team_B.v_angle_range{:,pp})*repmat(linspace(0,1,200),num_data_rows,1);
+    angle_points{pp} = Team_B.v_angle_minus(:,1) + ...
+        diag(Team_B.v_angle_range(:,pp))*repmat(linspace(0,1,200),num_data_rows,1);
     
     % calculates the end point of line segments that start from the defender
     % position and follow the range of directions the player can move 
@@ -183,9 +197,9 @@ for pp = 1:11
     % with a given passing line. Later on, the time needed by the defender 
     % for that interception will be calculated.
     inf_velocity = 9999999;
-    def_coverage_x{pp} = Team_B.x{:,pp} + ...
+    def_coverage_x{pp} = Team_B.x(:,pp) + ...
         inf_velocity * sind(angle_points{pp});
-    def_coverage_y{pp} = Team_B.y{:,pp} + ...
+    def_coverage_y{pp} = Team_B.y(:,pp) + ...
         inf_velocity * cosd(angle_points{pp});
 end
 
@@ -201,7 +215,7 @@ for t = 1:length(ix_plays)
     
     % position of ball owner
     ball_owner_pos = ...
-        [Team_A.x{t,ball_owner} Team_A.y{t,ball_owner}];
+        [Team_A.x(t,ball_owner) Team_A.y(t,ball_owner)];
     
     % runs every potential pass-receiving player from Team_A
     for pp1 = 1:11        
@@ -217,34 +231,34 @@ for t = 1:length(ix_plays)
             for pp2 = 1:11
                 % Line segments extending from each defensive player
                 def_lines(:,1:4) = ...
-                    [repmat([Team_B.x{t,pp2} Team_B.y{t,pp2}],200,1) ...
+                    [repmat([Team_B.x(t,pp2) Team_B.y(t,pp2)],200,1) ...
                     def_coverage_x{pp2}(t,:)' def_coverage_y{pp2}(t,:)'];
                 
                 % the variables below only need to be calculated once per
                 % player in attacking team (pp1)
                 if pp2 == 1
                     % position of receiving player
-                    receiver_pos = [Team_A.x{t,pp1} Team_A.y{t,pp1}];
+                    receiver_pos = [Team_A.x(t,pp1) Team_A.y(t,pp1)];
                     % correspoding passing line segment
                     passing_line = [ball_owner_pos receiver_pos];
                 
                     % if future positioning is being considered
                     if time == 2
                         receiver_pos = receiver_pos + ...
-                            [Team_A.v_x{t,pp1} Team_A.v_y{t,pp1}];
+                            [Team_A.v_x(t,pp1) Team_A.v_y(t,pp1)];
                     end
                 end
                 
                 % current and future defending player position
-                defender_pos = [Team_B.x{t,pp2} Team_B.y{t,pp2}];
-                defender_Fpos = [Team_B.x{t,pp2} + Team_B.v_x{t,pp2}...
-                    Team_B.y{t,pp2} + Team_B.v_y{t,pp2}];
+                defender_pos = [Team_B.x(t,pp2) Team_B.y(t,pp2)];
+                defender_Fpos = [Team_B.x(t,pp2) + Team_B.v_x(t,pp2)...
+                    Team_B.y(t,pp2) + Team_B.v_y(t,pp2)];
             
                 % The defensive line segments are used for each opposing 
                 % player to calculate if that player can arrive to a passing
                 % line before the ball reaches a potential receiving player 
                 intercept_bool = lineSegmentIntersect(def_lines,passing_line,...
-                    Team_B.v_total{t,pp2});
+                    Team_B.v_total(t,pp2));
                 
                 % distance between the defender and the passing line
                 % ins indicats if the passing line is intercepted
@@ -288,7 +302,7 @@ for t = 1:length(ix_plays)
             % ????
             if isempty(right)
                 distanceright(:,1) = ...
-                    (Team_A.x{t,ball_owner} + Team_A.x{t,pp1})/2;
+                    (Team_A.x(t,ball_owner) + Team_A.x(t,pp1))/2;
                 distanceright(:,2) = 0;
             else
                 distanceright(:,1) = index(distance(:)<0); % ????
@@ -297,7 +311,7 @@ for t = 1:length(ix_plays)
             
             % ????
             if isempty(left)
-                distanceleft(:,1) = (Team_A.x{t,ball_owner} + Team_A.x{t,pp1})/2;
+                distanceleft(:,1) = (Team_A.x(t,ball_owner) + Team_A.x(t,pp1))/2;
                 distanceleft(:,2) = 0;
             else
                 distanceleft(:,2)=distance(distance(:)>0);
