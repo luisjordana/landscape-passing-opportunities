@@ -175,9 +175,11 @@ for pp = 1:11
     angle_points{pp} = Team_B.v_angle_minus{:,1} + ...
         diag(Team_B.v_angle_range{:,pp})*repmat(linspace(0,1,200),num_data_rows,1);
     
-    % defensive coverage considers an exaggerated velocity so that the line
-    % segments reach the pitch boundaries (it is okay if the field limits
-    % are surpasssed). This will be used to detect possible interceptions
+    % calculates the end point of line segments that start from the defender
+    % position and follow the range of directions the player can move 
+    % (depending on his velocity). an exaggerated velocity is considered so
+    % that the line segments reach the pitch boundaries (it is okay if they
+    % are even surpassed). This will be used to detect possible interceptions
     % with a given passing line. Later on, the time needed by the defender 
     % for that interception will be calculated.
     inf_velocity = 9999999;
