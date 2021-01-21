@@ -5,7 +5,7 @@
 % XYI and XY2 naming was defined in the original script, and in this
 % project correspond to the coverage lines from a defender and the passing
 % line between the ball carrier and a potential receiver, respectively
-function out = lineSegmentIntersect(XY1,XY2,def_velocity)
+function intercept_bool = lineSegmentIntersect(XY1,XY2,def_velocity)
 %LINESEGMENTINTERSECT Intersections of line segments.
 %   OUT = LINESEGMENTINTERSECT(XY1,XY2) finds the 2D Cartesian Coordinates of
 %   intersection points between the set of line segments given in XY1 and XY2.
@@ -82,26 +82,37 @@ u_b = numerator_b ./ denominator;
 INT_X = X1+X2_X1.*u_a;
 INT_Y = Y1+Y2_Y1.*u_a;
 INT_B = (u_a >= 0) & (u_a <= 1) & (u_b >= 0) & (u_b <= 1);
-PAR_B = denominator == 0;
-COINC_B = (numerator_a == 0 & numerator_b == 0 & PAR_B);
+
+% boolean, where false (0) indicates that a infinitely long defending 
+% line, originating from the defending player, cannot intercept a given 
+% passing line, while true (1) the contrary.
+intercept_bool = INT_B;
+
+intercept_x =  INT_X .* INT_B;
+intercept_y =  INT_Y .* INT_B;
+
+defender_x = XY1(1,1);
+defender_y = XY1(1,2);
+
+% assumes that ball position = ball owner position
+ball_x = XY2(1,1);
+ball_y = XY2(1,2);
 
 % the defensive coverage segments which cross the passing line 
-ix_intercept = INT_B == 1;
+ix_intercept = intercept_bool == 1;
 
 % distance between a given defender and the defensive coverage-passing line
 % interception 
-dist_def_to_interception = sqrt(...
-    (XY1(ix_intercept,1) - out.intMatrixX).^2 + ...
-    (XY1(ix_intercept,2) - out.intMatrixY(ix_intercept)).^2);
+dist_def_to_interception = sqrt((defender_x - intercept_x).^2 + ...
+    (defender_y - intercept_y).^2);
 
 % time for a given defender to intercept a passing line
 time_def_to_interception = dist_def_to_interception / def_velocity;
 
 % distance between the ballowner (the starting point of the pass) and the
 % possible pass interception by a given defender
-dist_ball_to_interception = sqrt(...
-    (XY2(ix_intercept,1) - out.intMatrixX(ix_intercept)).^2 + ...
-    (XY2(ix_intercept,2)-out.intMatrixY(ix_intercept)).^2);
+dist_ball_to_interception = sqrt((ball_x - intercept_x(ix_intercept)).^2 + ...
+    (ball_y - intercept_y(ix_intercept)).^2);
 
 % assumed ball speed
 ball_speed = 10;
@@ -112,17 +123,14 @@ time_ball_to_interception = dist_ball_to_interception / ball_speed;
 % no-interception: if the defender takes longer than the ball to reach a 
 % potential interception point
 ix_no_intercept = time_def_to_interception > time_ball_to_interception;
-% corrects this index, since previously infinitely long defensive line
-% segments were considered
-INT_B(ix_intercept(ix_no_intercept)) = 0;
 
-% Arrange output
-out.intAdjacencyMatrix = INT_B;
-out.intMatrixX = INT_X .* INT_B;
-out.intMatrixY = INT_Y .* INT_B;
-out.intNormalizedDistance1To2 = u_a;
-out.intNormalizedDistance2To1 = u_b;
-out.parAdjacencyMatrix = PAR_B;
-out.coincAdjacencyMatrix= COINC_B;
+% corrects this boolean, now having considered the effective time a given
+% defender takes to reach the calculated interception poin
+intercept_bool(ix_intercept(ix_no_intercept)) = 0;
+
+% converts boolean series to a single indicator
+% if no line intercepts pass: 0 > 1 => intercept_bool = 0
+% if at least one line intercepts pass: N >= 1 => intercept_bool = 1
+intercept_bool = min(sum(intercept_bool),1);
 
 end
