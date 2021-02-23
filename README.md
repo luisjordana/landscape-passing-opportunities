@@ -20,3 +20,5 @@ Due to data privacy issues, a few constraints had to be considered:
 - only the first two minutes of the game, which include two offensive plays, are made available
 
 The "main" branch presents a fully-working code. However, an "improv" branch will focus on improving code readability and efficiency, aiming for less written code, more explanatory comments, and faster/less demanding calculations.
+
+The videos in results can be find in this youtube channel https://www.youtube.com/channel/UCjZ_fkXrKQ_xLGq_xb7H7og in case the reader wants to visualize them without downloading them.
